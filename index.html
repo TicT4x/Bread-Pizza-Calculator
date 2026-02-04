@@ -92,6 +92,25 @@
             background-color: #374151;
             color: #9ca3af;
         }
+        /* Tab Styles */
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            transition: all 0.2s;
+            color: #9ca3af;
+            background-color: transparent;
+        }
+        .tab-btn.active {
+            background-color: #1f2937; /* Match body bg or card bg */
+            background-color: #1f2937; 
+            background: #1f2937;
+            border-bottom: 2px solid #f59e0b;
+            color: #f59e0b;
+        }
+        
         /* Footer Animation */
         #footerPanel {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -131,7 +150,7 @@
             <!-- Dough Mode Switcher (Bread vs Pizza) -->
             <div class="bg-gray-800 p-1 rounded-lg flex text-sm shadow-md mb-2">
                 <button id="btnModeBread" onclick="setDoughMode('bread')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-active">
-                    <i class="fa-solid fa-loaf mr-1"></i> Brot
+                    <i class="fa-solid fa-bread-slice mr-1"></i> Brot
                 </button>
                 <button id="btnModePizza" onclick="setDoughMode('pizza')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-inactive">
                     <i class="fa-solid fa-pizza-slice mr-1"></i> Pizza
@@ -255,7 +274,7 @@
             <section class="space-y-3">
                 <div class="flex justify-between items-center border-b border-gray-700 pb-1">
                     <h2 class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Triebmittel</h2>
-                    <!-- Hybrid Toggle (Hidden by default, shown via JS if yeast mode) -->
+                    <!-- Hybrid Toggle -->
                     <div id="hybridToggleContainer" class="flex items-center">
                          <label class="flex items-center cursor-pointer">
                             <span class="text-[10px] text-gray-400 mr-2 uppercase tracking-wide">Zusätzl. Sauerteig</span>
@@ -280,18 +299,8 @@
                     </button>
                 </div>
 
-                <!-- Mode Switcher -->
-                <div class="bg-gray-800 p-1 rounded-lg flex text-sm shadow-md mb-2">
-                    <button id="btnModeYeast" onclick="setCalcMode('calcYeast')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-active">
-                        <i class="fa-regular fa-clock mr-1"></i> Wunschzeit
-                    </button>
-                    <button id="btnModeTime" onclick="setCalcMode('calcTime')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-inactive">
-                        <i class="fa-solid fa-cube mr-1"></i> Menge?
-                    </button>
-                </div>
-
                 <!-- Sauerteig Add-On (Hybrid) -->
-                <div id="hybridSourdoughContainer" class="bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-700 hidden">
+                <div id="hybridSourdoughContainer" class="bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-700 hidden mb-3">
                     <div class="flex justify-between mb-2 items-center">
                         <label class="text-gray-300 text-sm flex items-baseline">
                             <i class="fa-solid fa-jar w-5"></i>Sauerteig 
@@ -309,37 +318,55 @@
                     </div>
                 </div>
 
-                <!-- INPUT: Amount (Visible in Mode "Menge?") -->
-                <div id="inputAmountGroup" class="bg-gray-800 p-3 rounded-xl shadow-sm border border-amber-500/30 hidden">
-                    <div class="flex justify-between mb-2 items-center">
-                        <label class="text-gray-300 text-sm" id="labelAmountInput">Hefemenge (g)</label>
-                        <div class="text-xs text-gray-500 text-right">
-                            <span id="amountPercentDisplay">0.7</span>%
-                        </div>
+                <!-- Mode Tabs (Integrated into Input) -->
+                <div>
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-700">
+                        <button id="tabCalcYeast" onclick="setCalcMode('calcYeast')" class="tab-btn active flex-1 flex items-center justify-center">
+                            <i class="fa-regular fa-clock mr-2"></i>Wunschzeit
+                        </button>
+                        <button id="tabCalcTime" onclick="setCalcMode('calcTime')" class="tab-btn flex-1 flex items-center justify-center">
+                            <i class="fa-solid fa-cube mr-2"></i>Menge?
+                        </button>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <button class="control-btn" onclick="adjustValue('amountInputVal', -0.1)"><i class="fa-solid fa-minus text-xs"></i></button>
-                        <div class="flex items-baseline justify-center w-full">
-                            <input type="number" id="amountInputVal" value="3.5" step="0.1" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
-                            <span class="text-amber-500 text-sm ml-1">g</span>
-                        </div>
-                        <button class="control-btn" onclick="adjustValue('amountInputVal', 0.1)"><i class="fa-solid fa-plus text-xs"></i></button>
-                    </div>
-                </div>
 
-                <!-- INPUT: Time (Visible in Mode "Wunschzeit") -->
-                <div id="inputTimeGroup" class="bg-gray-800 p-3 rounded-xl shadow-sm border border-amber-500/30">
-                    <div class="flex justify-between mb-2">
-                        <label class="text-gray-300 text-sm">Wunschzeit</label>
-                        <span class="text-[10px] text-gray-500">Stock+Stück</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <button class="control-btn" onclick="adjustValue('timeInputVal', -0.5)"><i class="fa-solid fa-minus text-xs"></i></button>
-                        <div class="flex items-baseline justify-center w-full">
-                            <input type="number" id="timeInputVal" value="4" step="0.5" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
-                            <span class="text-amber-500 text-sm ml-1">Std.</span>
+                    <!-- Input Content Area -->
+                    <div class="bg-gray-800 p-4 rounded-b-xl rounded-tr-xl shadow-sm border-t-0 border border-gray-700">
+                        
+                        <!-- INPUT: Time (Visible in Mode "Wunschzeit") -->
+                        <div id="inputTimeGroup">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-gray-300 text-sm">Gehzeit</label>
+                                <span class="text-[10px] text-gray-500">Stock+Stück</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <button class="control-btn" onclick="adjustValue('timeInputVal', -0.5)"><i class="fa-solid fa-minus text-xs"></i></button>
+                                <div class="flex items-baseline justify-center w-full">
+                                    <input type="number" id="timeInputVal" value="4" step="0.5" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
+                                    <span class="text-amber-500 text-sm ml-1">Std.</span>
+                                </div>
+                                <button class="control-btn" onclick="adjustValue('timeInputVal', 0.5)"><i class="fa-solid fa-plus text-xs"></i></button>
+                            </div>
                         </div>
-                        <button class="control-btn" onclick="adjustValue('timeInputVal', 0.5)"><i class="fa-solid fa-plus text-xs"></i></button>
+
+                        <!-- INPUT: Amount (Visible in Mode "Menge?") -->
+                        <div id="inputAmountGroup" class="hidden">
+                            <div class="flex justify-between mb-2 items-center">
+                                <label class="text-gray-300 text-sm" id="labelAmountInput">Hefemenge</label>
+                                <div class="text-xs text-gray-500 text-right">
+                                    <span id="amountPercentDisplay">0.7</span>%
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <button class="control-btn" onclick="adjustValue('amountInputVal', -0.1)"><i class="fa-solid fa-minus text-xs"></i></button>
+                                <div class="flex items-baseline justify-center w-full">
+                                    <input type="number" id="amountInputVal" value="3.5" step="0.1" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
+                                    <span class="text-amber-500 text-sm ml-1">g</span>
+                                </div>
+                                <button class="control-btn" onclick="adjustValue('amountInputVal', 0.1)"><i class="fa-solid fa-plus text-xs"></i></button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </section>
@@ -432,12 +459,13 @@
                     </div>
                     <span class="font-bold text-white"><span id="recSalt">0</span> g</span>
                 </div>
-                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-green-600" id="rowSourdoughRec">
+                <!-- Sourdough Row (Modified to hide '+' in pure mode and hide row if unused in yeast mode) -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-green-600 hidden" id="rowSourdoughRec">
                     <div>
                          <span class="text-gray-300 block">Sauerteig</span>
                          <span class="text-xs text-gray-500"><span id="recSdHydration">60</span>% Hydration</span>
                     </div>
-                    <span class="font-bold text-white">+ <span id="recSourdough">0</span> g</span>
+                    <span class="font-bold text-white"><span id="recSourdoughPlus">+ </span><span id="recSourdough">0</span> g</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-200" id="rowYeastRec">
                     <div>
@@ -567,19 +595,19 @@
             // Toggle UI Elements
             const hybridSourdoughContainer = document.getElementById('hybridSourdoughContainer');
             const rowYeastRec = document.getElementById('rowYeastRec');
-            const btnModeTime = document.getElementById('btnModeTime');
             const hybridToggleContainer = document.getElementById('hybridToggleContainer');
             const hybridToggle = document.getElementById('hybridSourdoughToggle');
+            const tabCalcTime = document.getElementById('tabCalcTime');
             
             if (sourdoughMode) {
                 hybridSourdoughContainer.classList.add('hidden'); 
                 hybridToggleContainer.classList.add('hidden');
                 rowYeastRec.classList.add('hidden'); 
-                btnModeTime.innerHTML = '<i class="fa-solid fa-jar mr-1"></i> Sauerteigmenge';
+                tabCalcTime.innerHTML = '<i class="fa-solid fa-jar mr-2"></i>Sauerteigmenge';
             } else {
                 hybridToggleContainer.classList.remove('hidden');
                 rowYeastRec.classList.remove('hidden');
-                btnModeTime.innerHTML = '<i class="fa-solid fa-cube mr-1"></i> Hefemenge';
+                tabCalcTime.innerHTML = '<i class="fa-solid fa-cube mr-2"></i>Hefemenge';
                 
                 // Restore visibility based on checkbox state
                 if(hybridToggle.checked) {
@@ -606,8 +634,9 @@
 
         function setCalcMode(newMode) {
             calcMode = newMode;
-            const btnTime = document.getElementById('btnModeTime'); 
-            const btnYeast = document.getElementById('btnModeYeast'); 
+            
+            const tabYeast = document.getElementById('tabCalcYeast');
+            const tabTime = document.getElementById('tabCalcTime');
             const inputAmountGroup = document.getElementById('inputAmountGroup');
             const groupTime = document.getElementById('inputTimeGroup');
             const resultLabel = document.getElementById('resultLabel');
@@ -615,25 +644,26 @@
             const labelAmountInput = document.getElementById('labelAmountInput');
 
             if (calcMode === 'calcTime') {
-                btnTime.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-active";
-                btnYeast.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-inactive";
+                tabTime.classList.add('active');
+                tabYeast.classList.remove('active');
+                
                 inputAmountGroup.classList.remove('hidden');
                 groupTime.classList.add('hidden');
                 resultLabel.innerText = "Geschätzte Gehzeit";
                 resultUnit.innerText = "Std.";
                 
                 if (sourdoughMode) {
-                    labelAmountInput.innerText = "Sauerteig (g)";
-                    // Set default if value looks like yeast amount
+                    labelAmountInput.innerText = "Sauerteig";
                     if(parseFloat(document.getElementById('amountInputVal').value) < 10) {
                          document.getElementById('amountInputVal').value = 100;
                     }
                 } else {
-                    labelAmountInput.innerText = "Hefemenge (g)";
+                    labelAmountInput.innerText = "Hefemenge";
                 }
             } else {
-                btnTime.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-inactive";
-                btnYeast.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-active";
+                tabYeast.classList.add('active');
+                tabTime.classList.remove('active');
+                
                 inputAmountGroup.classList.add('hidden');
                 groupTime.classList.remove('hidden');
                 if (sourdoughMode) resultLabel.innerText = "Benötigter Sauerteig";
@@ -844,11 +874,23 @@
             document.getElementById('recSourdough').innerText = finalSourdoughGrams;
             document.getElementById('recSdHydration').innerText = sdHydration;
             
+            const rowSourdoughRec = document.getElementById('rowSourdoughRec');
+            
             if (sourdoughMode) {
                  document.getElementById('recYeast').innerText = "0";
+                 rowSourdoughRec.classList.remove('hidden');
+                 document.getElementById('recSourdoughPlus').style.display = 'none';
             } else {
                  document.getElementById('recYeast').innerText = parseFloat(yeastGramsForRecipe).toFixed(2);
                  document.getElementById('recYeastType').innerText = yeastTypeLabel(currentYeastType);
+                 
+                 // Show row ONLY if hybrid is toggled on (and we are in yeast mode)
+                 if(hybridToggle.checked) {
+                     rowSourdoughRec.classList.remove('hidden');
+                     document.getElementById('recSourdoughPlus').style.display = 'inline';
+                 } else {
+                     rowSourdoughRec.classList.add('hidden');
+                 }
             }
 
             if (pizzaMode) {
@@ -887,15 +929,16 @@
             document.getElementById('ballWeight').value = 280;
             document.getElementById('ballCount').value = 4;
             
-            setDoughMode('bread');
+            document.getElementById('pizzaModeToggle').checked = false;
             document.getElementById('hybridSourdoughToggle').checked = false; // Reset hybrid toggle
             
+            togglePizzaMode();
             setYeastType('dry'); // Reset type to dry
         }
 
         // Initialize
         setYeastType('dry');
-        setDoughMode('bread');
+        togglePizzaMode(); 
         updateCalculation();
 
     </script>
