@@ -92,7 +92,6 @@
             background-color: #374151;
             color: #9ca3af;
         }
-        /* Tab Styles */
         .tab-btn {
             padding: 0.5rem 1rem;
             font-size: 0.875rem;
@@ -104,13 +103,10 @@
             background-color: transparent;
         }
         .tab-btn.active {
-            background-color: #1f2937; /* Match body bg or card bg */
             background-color: #1f2937; 
-            background: #1f2937;
             border-bottom: 2px solid #f59e0b;
             color: #f59e0b;
         }
-        
         /* Footer Animation */
         #footerPanel {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -122,7 +118,7 @@
         .footer-collapsed {
             transform: translateY(calc(100% - 85px)); 
         }
-        #settingsModal {
+        #settingsModal, #addIngredientModal {
             transition: opacity 0.2s ease-in-out;
         }
         body {
@@ -159,7 +155,12 @@
 
             <!-- Basis Zutaten -->
             <section class="space-y-3">
-                <h2 class="text-xs uppercase tracking-wider text-gray-500 font-semibold border-b border-gray-700 pb-1">Basis Zutaten</h2>
+                <div class="flex justify-between items-center border-b border-gray-700 pb-1">
+                    <h2 class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Basis Zutaten</h2>
+                    <button onclick="toggleAddIngredient()" class="text-amber-500 hover:text-amber-400 text-sm font-bold px-2">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
                 
                 <!-- Pizza Inputs -->
                 <div id="pizzaInputs" class="hidden grid grid-cols-2 gap-3">
@@ -242,6 +243,10 @@
                         <button class="control-btn" onclick="adjustValue('salt', 0.1)"><i class="fa-solid fa-plus text-xs"></i></button>
                     </div>
                 </div>
+
+                <!-- Extras Container (Dynamic) -->
+                <div id="extrasContainer" class="space-y-3"></div>
+
             </section>
 
             <!-- Environment Section -->
@@ -286,7 +291,7 @@
                     </div>
                 </div>
 
-                <!-- Yeast Type Segmented Control -->
+                <!-- Yeast Type Segmented Control (MOVED DOWN) -->
                 <div class="bg-gray-800 p-1 rounded-lg flex text-xs shadow-md mb-3">
                     <button id="btnYeastDry" onclick="setYeastType('dry')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-active">
                         <i class="fa-solid fa-envelope mr-1"></i> Trocken
@@ -381,36 +386,74 @@
                 <button onclick="toggleSettings()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
             </div>
             
-            <!-- Activity Calibration -->
-            <div class="mb-6">
-                <label class="text-sm text-gray-300 block mb-2"><i class="fa-solid fa-gauge-high mr-2"></i>Triebkraft Kalibrierung</label>
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-amber-500 font-mono text-xs" id="dispActivity">Normal</span>
-                    </div>
-                    <input type="range" id="activity" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updateCalculation()">
-                    <div class="text-xs text-gray-500 mt-1 flex justify-between">
-                        <span>Träge</span>
-                        <span>Turbo</span>
+            <div class="space-y-6">
+                <!-- Activity Calibration -->
+                <div>
+                    <label class="text-sm text-gray-300 block mb-2"><i class="fa-solid fa-gauge-high mr-2"></i>Triebkraft Kalibrierung</label>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-amber-500 font-mono text-xs" id="dispActivity">Normal</span>
+                        </div>
+                        <input type="range" id="activity" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updateCalculation()">
+                        <div class="text-xs text-gray-500 mt-1 flex justify-between">
+                            <span>Träge</span>
+                            <span>Turbo</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Sourdough Hydration -->
-            <div class="mb-2">
-                <label class="text-sm text-gray-300 block mb-2"><i class="fa-solid fa-droplet mr-2"></i>Sauerteig Hydration</label>
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-amber-500 font-mono text-xs" id="dispSdHydration">60%</span>
-                    </div>
-                    <input type="range" id="sdHydration" min="50" max="120" step="5" value="60" oninput="updateCalculation()">
-                    <div class="text-xs text-gray-500 mt-1 flex justify-between">
-                        <span>Fest (50%)</span>
-                        <span>Flüssig (120%)</span>
+                <!-- Sourdough Hydration -->
+                <div>
+                    <label class="text-sm text-gray-300 block mb-2"><i class="fa-solid fa-droplet mr-2"></i>Sauerteig Hydration</label>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-amber-500 font-mono text-xs" id="dispSdHydration">60%</span>
+                        </div>
+                        <input type="range" id="sdHydration" min="50" max="120" step="5" value="60" oninput="updateCalculation()">
+                        <div class="text-xs text-gray-500 mt-1 flex justify-between">
+                            <span>Fest (50%)</span>
+                            <span>Flüssig (120%)</span>
+                        </div>
                     </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Beeinflusst die Salz-Berechnung.</p>
+
+                <!-- Poolish Hydration -->
+                <div>
+                    <label class="text-sm text-gray-300 block mb-2"><i class="fa-solid fa-glass-water mr-2"></i>Poolish Hydration</label>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-amber-500 font-mono text-xs" id="dispPoolishHydration">100%</span>
+                        </div>
+                        <input type="range" id="poolishHydration" min="60" max="120" step="5" value="100" oninput="updateCalculation()">
+                        <div class="text-xs text-gray-500 mt-1 flex justify-between">
+                            <span>Fest</span>
+                            <span>Flüssig</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ADD INGREDIENT MODAL -->
+    <div id="addIngredientModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0" onclick="toggleAddIngredient()">
+        <div class="bg-gray-800 p-6 rounded-2xl w-11/12 max-w-sm shadow-2xl border border-gray-600" onclick="event.stopPropagation()">
+            <h3 class="text-lg font-bold text-white mb-4">Zutat hinzufügen</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="addExtra('poolish')" class="bg-gray-700 p-4 rounded-xl hover:bg-gray-600 flex flex-col items-center">
+                    <i class="fa-solid fa-glass-water text-2xl text-amber-500 mb-2"></i>
+                    <span class="text-sm">Poolish/Vorteig</span>
+                </button>
+                <button onclick="addExtra('biga')" class="bg-gray-700 p-4 rounded-xl hover:bg-gray-600 flex flex-col items-center">
+                    <i class="fa-solid fa-cheese text-2xl text-amber-500 mb-2"></i> <!-- Biga (stiff) -->
+                    <span class="text-sm">Biga (45%)</span>
+                </button>
+                <button onclick="addExtra('oil')" class="bg-gray-700 p-4 rounded-xl hover:bg-gray-600 flex flex-col items-center col-span-2">
+                    <i class="fa-solid fa-bottle-droplet text-2xl text-amber-500 mb-2"></i>
+                    <span class="text-sm">Olivenöl</span>
+                </button>
+            </div>
+            <button onclick="toggleAddIngredient()" class="w-full mt-6 py-2 text-gray-400 hover:text-white">Abbrechen</button>
         </div>
     </div>
 
@@ -439,39 +482,54 @@
                 <i class="fa-solid fa-list-check mr-3"></i>Rezept
             </h3>
             
-            <div class="space-y-3 font-mono text-lg">
-                <!-- Recipe Lines -->
-                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-amber-500">
-                    <span class="text-gray-300">Mehl (Hauptteig)</span>
-                    <span class="font-bold text-white"><span id="recFlour">0</span> g</span>
+            <div class="space-y-3 font-mono text-lg" id="recipeContainer">
+                
+                <!-- Preferment Recipes Container (New) -->
+                <div id="prefermentRecipeContainer" class="space-y-3 mb-6 hidden">
+                    <!-- Dynamic content will be injected here -->
                 </div>
-                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-blue-500">
-                    <div>
-                        <span class="text-gray-300 block">Wasser</span>
-                        <span class="text-xs text-gray-500" id="recHydration">65%</span>
+
+                <!-- Main Dough Section -->
+                <div id="mainDoughSection" class="space-y-3">
+                    <!-- Header for Main Dough (Hidden by default) -->
+                    <h4 id="mainDoughHeader" class="text-amber-500 font-bold mb-2 text-sm uppercase tracking-wider border-b border-gray-700 pb-1 hidden">Hauptteig</h4>
+
+                    <!-- Static Parts -->
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-amber-500">
+                        <span class="text-gray-300">Mehl</span>
+                        <span class="font-bold text-white"><span id="recFlour">0</span> g</span>
                     </div>
-                    <span class="font-bold text-white"><span id="recWater">0</span> g</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-gray-400">
-                     <div>
-                        <span class="text-gray-300 block">Salz</span>
-                        <span class="text-xs text-gray-500" id="recSaltPct">2%</span>
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-blue-500">
+                        <div>
+                            <span class="text-gray-300 block">Wasser</span>
+                        </div>
+                        <span class="font-bold text-white"><span id="recWater">0</span> g</span>
                     </div>
-                    <span class="font-bold text-white"><span id="recSalt">0</span> g</span>
-                </div>
-                <!-- Sourdough Row (Modified to hide '+' in pure mode and hide row if unused in yeast mode) -->
-                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-green-600 hidden" id="rowSourdoughRec">
-                    <div>
-                         <span class="text-gray-300 block">Sauerteig</span>
-                         <span class="text-xs text-gray-500"><span id="recSdHydration">60</span>% Hydration</span>
+                    
+                    <!-- Extras Injection Point (For Oil etc.) -->
+                    <div id="recipeExtras" class="space-y-3"></div>
+
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-gray-400">
+                        <div>
+                            <span class="text-gray-300 block">Salz</span>
+                        </div>
+                        <span class="font-bold text-white"><span id="recSalt">0</span> g</span>
                     </div>
-                    <span class="font-bold text-white"><span id="recSourdoughPlus">+ </span><span id="recSourdough">0</span> g</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-200" id="rowYeastRec">
-                    <div>
-                        <span class="text-gray-300 block">Hefe (<span id="recYeastType">Trocken</span>)</span>
+                    
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-green-600 hidden" id="rowSourdoughRec">
+                        <div>
+                            <span class="text-gray-300 block">Sauerteig</span>
+                            <span class="text-xs text-gray-500"><span id="recSdHydration">60</span>% Hydration</span>
+                        </div>
+                        <span class="font-bold text-white"><span id="recSourdoughPlus">+ </span><span id="recSourdough">0</span> g</span>
                     </div>
-                    <span class="font-bold text-amber-400"><span id="recYeast">0</span> g</span>
+                    
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-200" id="rowYeastRec">
+                        <div>
+                            <span class="text-gray-300 block">Hefe (<span id="recYeastType">Trocken</span>)</span>
+                        </div>
+                        <span class="font-bold text-amber-400"><span id="recYeast">0</span> g</span>
+                    </div>
                 </div>
                 
                 <div class="mt-6 pt-4 border-t border-gray-700 flex justify-between text-gray-400 text-sm">
@@ -496,6 +554,7 @@
         let sourdoughMode = false;
         let isFooterOpen = false;
         let currentYeastType = 'dry';
+        let extras = []; 
 
         // Constants
         const BASE_TEMP = 20; 
@@ -503,9 +562,9 @@
         const TIME_EXPONENT = -1.45; 
         const DOUBLING_TEMP_STEP = 5.0; 
 
-        // Removed instant, kept logic clean
         const YEAST_RATIOS_TO_DRY = { 'dry': 1.0, 'fresh': 3.0 };
-        const SOURDOUGH_PCT_TO_DRY_YEAST_PCT = 0.01; 
+        const SOURDOUGH_PCT_TO_DRY_YEAST_PCT = 0.01;
+        const PREFERMENT_FLOUR_TO_DRY_YEAST_FACTOR = 0.005; 
 
         // UI Handlers
         const footer = document.getElementById('footerPanel');
@@ -519,6 +578,15 @@
 
         function toggleSettings() {
             const modal = document.getElementById('settingsModal');
+            toggleModal(modal);
+        }
+
+        function toggleAddIngredient() {
+            const modal = document.getElementById('addIngredientModal');
+            toggleModal(modal);
+        }
+
+        function toggleModal(modal) {
             if (modal.classList.contains('hidden')) {
                 modal.classList.remove('hidden');
                 setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -543,9 +611,144 @@
             }
         }
 
+        // --- Extras Logic ---
+
+        function addExtra(type) {
+            const id = Date.now();
+            let label = "";
+            let unit = "%";
+            let defaultVal = 0;
+            let max = 100;
+            let step = 1;
+            let mode = 'inclusive'; 
+
+            if (type === 'poolish') {
+                label = "Poolish";
+                unit = "%";
+                defaultVal = 20;
+                max = 100;
+            } else if (type === 'biga') {
+                label = "Biga";
+                unit = "%";
+                defaultVal = 30;
+                max = 100;
+            } else if (type === 'oil') {
+                label = "Olivenöl";
+                unit = "%";
+                defaultVal = 2;
+                max = 20;
+                step = 0.5;
+                mode = 'additive'; 
+            }
+
+            extras.push({ id, type, value: defaultVal, mode, label, unit, max, step });
+            renderExtras();
+            toggleAddIngredient();
+            updateCalculation();
+        }
+
+        function removeExtra(id) {
+            extras = extras.filter(e => e.id !== id);
+            renderExtras();
+            updateCalculation();
+        }
+
+        function updateExtraValue(id, val) {
+            // Deprecated direct state update, using sync functions instead
+            // Kept for compatibility if called from code not updated
+            syncExtraFromInput(id, val);
+        }
+
+        function toggleExtraMode(id) {
+            const extra = extras.find(e => e.id === id);
+            if (extra) {
+                extra.mode = extra.mode === 'inclusive' ? 'additive' : 'inclusive';
+                renderExtras(); 
+                updateCalculation();
+            }
+        }
+
+        function renderExtras() {
+            const container = document.getElementById('extrasContainer');
+            container.innerHTML = '';
+
+            extras.forEach(extra => {
+                let controlsHtml = '';
+                
+                if (extra.type === 'poolish' || extra.type === 'biga') {
+                    const isInc = extra.mode === 'inclusive';
+                    controlsHtml = `
+                        <div class="flex items-center ml-2 cursor-pointer bg-gray-700 rounded-lg p-1 text-[10px]" onclick="toggleExtraMode(${extra.id})">
+                            <span class="px-2 rounded ${isInc ? 'bg-amber-600 text-white' : 'text-gray-400'}">Inkl.</span>
+                            <span class="px-2 rounded ${!isInc ? 'bg-amber-600 text-white' : 'text-gray-400'}">Exkl.</span>
+                        </div>
+                    `;
+                }
+
+                const html = `
+                <div class="bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-700 relative group">
+                    <button onclick="removeExtra(${extra.id})" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                    
+                    <div class="flex justify-between mb-2 items-center">
+                        <div class="flex items-center">
+                            <label class="text-gray-300 text-sm">${extra.label}</label>
+                            ${controlsHtml}
+                        </div>
+                        <div class="flex items-center">
+                            <span id="disp_${extra.id}" class="text-gray-400 text-xs mr-2">0g |</span>
+                            <div class="flex items-baseline text-sm mr-6">
+                                <input type="number" id="extra_num_${extra.id}" value="${extra.value}" step="${extra.step}" class="input-editable w-12" onchange="syncExtraFromInput(${extra.id}, this.value)">
+                                <span class="text-amber-500 ml-1">${extra.unit}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <button class="control-btn" onclick="adjustExtra(${extra.id}, -${extra.step})"><i class="fa-solid fa-minus text-xs"></i></button>
+                        <input type="range" id="extra_range_${extra.id}" min="0" max="${extra.max}" step="${extra.step}" value="${extra.value}" class="flex-1" oninput="syncExtraFromSlider(${extra.id}, this.value)">
+                        <button class="control-btn" onclick="adjustExtra(${extra.id}, ${extra.step})"><i class="fa-solid fa-plus text-xs"></i></button>
+                    </div>
+                </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function adjustExtra(id, delta) {
+            const extra = extras.find(e => e.id === id);
+            if(extra) {
+                let newVal = extra.value + delta;
+                if(newVal < 0) newVal = 0;
+                if(newVal > extra.max) newVal = extra.max;
+                newVal = Math.round(newVal * 100) / 100;
+                extra.value = newVal;
+                renderExtras(); 
+                updateCalculation();
+            }
+        }
+
+        function syncExtraFromSlider(id, value) {
+            const extra = extras.find(e => e.id === id);
+            if (extra) extra.value = parseFloat(value);
+            const numInput = document.getElementById('extra_num_' + id);
+            if (numInput) numInput.value = value;
+            updateCalculation();
+        }
+
+        function syncExtraFromInput(id, value) {
+            const extra = extras.find(e => e.id === id);
+            if (extra) extra.value = parseFloat(value);
+            const rangeInput = document.getElementById('extra_range_' + id);
+            if (rangeInput) rangeInput.value = value;
+            updateCalculation();
+        }
+
+        // --- Core Logic ---
+
         function setDoughMode(mode) {
             pizzaMode = (mode === 'pizza');
-            
             const btnBread = document.getElementById('btnModeBread');
             const btnPizza = document.getElementById('btnModePizza');
             
@@ -578,21 +781,14 @@
 
         function setYeastType(type) {
             currentYeastType = type;
-            
-            // Update Buttons State
             ['dry', 'fresh', 'sourdough'].forEach(t => {
                 const btn = document.getElementById('btnYeast' + t.charAt(0).toUpperCase() + t.slice(1));
-                if (t === type) {
-                    btn.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-active";
-                } else {
-                    btn.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-inactive";
-                }
+                if (t === type) btn.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-active";
+                else btn.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-inactive";
             });
 
-            // Logic for Sourdough Mode
             sourdoughMode = (type === 'sourdough');
             
-            // Toggle UI Elements
             const hybridSourdoughContainer = document.getElementById('hybridSourdoughContainer');
             const rowYeastRec = document.getElementById('rowYeastRec');
             const hybridToggleContainer = document.getElementById('hybridToggleContainer');
@@ -608,33 +804,23 @@
                 hybridToggleContainer.classList.remove('hidden');
                 rowYeastRec.classList.remove('hidden');
                 tabCalcTime.innerHTML = '<i class="fa-solid fa-cube mr-2"></i>Hefemenge';
-                
-                // Restore visibility based on checkbox state
-                if(hybridToggle.checked) {
-                    hybridSourdoughContainer.classList.remove('hidden');
-                } else {
-                    hybridSourdoughContainer.classList.add('hidden');
-                }
+                if(hybridToggle.checked) hybridSourdoughContainer.classList.remove('hidden');
+                else hybridSourdoughContainer.classList.add('hidden');
             }
             
-            setCalcMode(calcMode); // Refresh labels and visibility
+            setCalcMode(calcMode); 
         }
 
         function toggleHybridSourdough() {
              const isChecked = document.getElementById('hybridSourdoughToggle').checked;
              const container = document.getElementById('hybridSourdoughContainer');
-             
-             if(isChecked) {
-                 container.classList.remove('hidden');
-             } else {
-                 container.classList.add('hidden');
-             }
+             if(isChecked) container.classList.remove('hidden');
+             else container.classList.add('hidden');
              updateCalculation();
         }
 
         function setCalcMode(newMode) {
             calcMode = newMode;
-            
             const tabYeast = document.getElementById('tabCalcYeast');
             const tabTime = document.getElementById('tabCalcTime');
             const inputAmountGroup = document.getElementById('inputAmountGroup');
@@ -646,24 +832,19 @@
             if (calcMode === 'calcTime') {
                 tabTime.classList.add('active');
                 tabYeast.classList.remove('active');
-                
                 inputAmountGroup.classList.remove('hidden');
                 groupTime.classList.add('hidden');
                 resultLabel.innerText = "Geschätzte Gehzeit";
                 resultUnit.innerText = "Std.";
-                
                 if (sourdoughMode) {
                     labelAmountInput.innerText = "Sauerteig";
-                    if(parseFloat(document.getElementById('amountInputVal').value) < 10) {
-                         document.getElementById('amountInputVal').value = 100;
-                    }
+                    if(parseFloat(document.getElementById('amountInputVal').value) < 10) document.getElementById('amountInputVal').value = 100;
                 } else {
                     labelAmountInput.innerText = "Hefemenge";
                 }
             } else {
                 tabYeast.classList.add('active');
                 tabTime.classList.remove('active');
-                
                 inputAmountGroup.classList.add('hidden');
                 groupTime.classList.remove('hidden');
                 if (sourdoughMode) resultLabel.innerText = "Benötigter Sauerteig";
@@ -673,7 +854,7 @@
             updateCalculation();
         }
 
-        // --- Helper Functions for Adjustments ---
+        // --- Helper Functions ---
 
         function adjustValue(id, delta) {
             const input = document.getElementById(id);
@@ -714,104 +895,151 @@
             // Get Settings
             const sdHydration = parseFloat(document.getElementById('sdHydration').value);
             document.getElementById('dispSdHydration').innerText = sdHydration + "%";
+            
+            const poolishHydration = parseFloat(document.getElementById('poolishHydration').value);
+            document.getElementById('dispPoolishHydration').innerText = poolishHydration + "%";
+
             const activityFactor = parseFloat(document.getElementById('activity').value);
             const temp = parseFloat(document.getElementById('temp').value); 
             const hydration = parseFloat(document.getElementById('hydration').value);
             const saltPct = parseFloat(document.getElementById('salt').value);
             
-            // Factor for Flour content in Sourdough
             const sdFlourFactor = 100 / (100 + sdHydration);
 
-            // Determine Inputs
-            let sourdoughGrams = 0;
-            // Check for Hybrid Toggle State
-            const hybridToggle = document.getElementById('hybridSourdoughToggle');
+            let targetTotalWeight = 0;
+            let mainFlour = 0; 
             
-            if (!sourdoughMode) {
-                if(hybridToggle.checked) {
-                    sourdoughGrams = parseFloat(document.getElementById('sourdoughAddon').value);
-                } else {
-                    sourdoughGrams = 0;
-                }
-            } else if (calcMode === 'calcTime') {
-                sourdoughGrams = parseFloat(document.getElementById('amountInputVal').value);
-            }
-
-            // 1. Determine Main Flour Amount
-            let flour = 500;
             if (pizzaMode) {
                 const ballWeight = parseFloat(document.getElementById('ballWeight').value) || 280;
                 const ballCount = parseFloat(document.getElementById('ballCount').value) || 4;
-                const totalTarget = ballWeight * ballCount;
-                
-                const sdFlour = sourdoughGrams * sdFlourFactor;
-                const saltContributionFromSd = sdFlour * (saltPct/100);
-                
-                const num = totalTarget - sourdoughGrams - saltContributionFromSd;
-                const den = 1 + (hydration/100) + (saltPct/100);
-                
-                let calculatedFlour = num / den;
-                if (calculatedFlour < 0) calculatedFlour = 0;
-                flour = Math.round(calculatedFlour);
-                document.getElementById('dispFlourPizza').innerText = flour + " g";
+                targetTotalWeight = ballWeight * ballCount;
             } else {
-                flour = parseFloat(document.getElementById('flour').value);
+                mainFlour = parseFloat(document.getElementById('flour').value);
             }
 
-            // 2. UI Updates
-            let actText = "Normal";
-            if(activityFactor < 0.8) actText = "Sehr langsam";
-            else if(activityFactor < 1.0) actText = "Langsam";
-            else if(activityFactor > 1.2) actText = "Sehr aktiv";
-            else if(activityFactor > 1.0) actText = "Aktiv";
-            document.getElementById('dispActivity').innerText = actText + ` (${Math.round(activityFactor*100)}%)`;
+            // --- Analyze Extras ---
+            let extrasWaterUnits = 0;
+            let tfUnits = 100;
+            let mainFlourUnits = 100;
+            
+            let oilUnits = 0;
+            let prefermentFermentationPower = 0; 
+            
+            let extrasRecipeData = []; 
+            let prefermentRecipes = []; 
 
-            // 3. Ingredients Calculation
-            const water = Math.round(flour * (hydration / 100));
+            extras.forEach(e => {
+                if (e.type === 'poolish' || e.type === 'biga') {
+                    const hyd = (e.type === 'poolish') ? poolishHydration : 45;
+                    
+                    if (e.mode === 'inclusive') {
+                        let pFlour = e.value; 
+                        mainFlourUnits -= pFlour;
+                        extrasWaterUnits += pFlour * (hyd/100);
+                    } else {
+                        let pFlour = e.value; 
+                        tfUnits += pFlour; 
+                        extrasWaterUnits += pFlour * (hyd/100);
+                    }
+                } else if (e.type === 'oil') {
+                    oilUnits += tfUnits * (e.value / 100);
+                }
+            });
             
-            let currentSdGramsForSalt = sourdoughGrams;
-            const sdFlourCurrent = currentSdGramsForSalt * sdFlourFactor;
-            const salt = Math.round((flour + sdFlourCurrent) * (saltPct / 100));
+            let totalWaterUnits = tfUnits * (hydration / 100);
+            let mainWaterUnits = totalWaterUnits - extrasWaterUnits;
+            if(mainWaterUnits < 0) mainWaterUnits = 0; 
+
+            let saltUnits = tfUnits * (saltPct / 100);
             
-            document.getElementById('waterAmount').innerText = water + 'g';
-            document.getElementById('saltAmount').innerText = salt + 'g';
+            let scalingFactor = 1.0;
             
-            // 4. Physics Engine
+            if (pizzaMode) {
+                let sourdoughGrams = 0;
+                if (!sourdoughMode && document.getElementById('hybridSourdoughToggle').checked) {
+                    sourdoughGrams = parseFloat(document.getElementById('sourdoughAddon').value);
+                    targetTotalWeight -= sourdoughGrams; 
+                }
+                
+                let sumUnits = tfUnits + totalWaterUnits + saltUnits + oilUnits;
+                scalingFactor = targetTotalWeight / sumUnits;
+            } else {
+                let sliderVal = parseFloat(document.getElementById('flour').value);
+                scalingFactor = sliderVal / 100;
+            }
+
+            let finalMainFlour = mainFlourUnits * scalingFactor;
+            let finalTotalFlour = tfUnits * scalingFactor;
+            let finalMainWater = mainWaterUnits * scalingFactor;
+            let finalSalt = saltUnits * scalingFactor;
+            let finalOil = oilUnits * scalingFactor;
+            
+            extras.forEach(e => {
+                if (e.type === 'poolish' || e.type === 'biga') {
+                    const hyd = (e.type === 'poolish') ? poolishHydration : 45;
+                    let pFlourUnits = (e.mode === 'inclusive') ? e.value : e.value; 
+                    let pFlourGrams = pFlourUnits * scalingFactor;
+                    let pWaterGrams = pFlourGrams * (hyd/100);
+                    let pTotalGrams = pFlourGrams + pWaterGrams;
+                    
+                    const dispEl = document.getElementById('disp_' + e.id);
+                    if(dispEl) dispEl.innerText = Math.round(pTotalGrams) + 'g |';
+
+                    prefermentRecipes.push({
+                        label: e.label,
+                        flour: pFlourGrams,
+                        water: pWaterGrams
+                    });
+                    
+                    prefermentFermentationPower += pFlourGrams * PREFERMENT_FLOUR_TO_DRY_YEAST_FACTOR;
+                } else if (e.type === 'oil') {
+                    extrasRecipeData.push({
+                        label: e.label,
+                        grams: finalOil
+                    });
+                    
+                    const dispEl = document.getElementById('disp_' + e.id);
+                    if(dispEl) dispEl.innerText = Math.round(finalOil) + 'g |';
+                }
+            });
+
+            // --- Handle Hybrid Sourdough ---
+            let hybridSourdoughGrams = 0;
+            if (!sourdoughMode && document.getElementById('hybridSourdoughToggle').checked) {
+                hybridSourdoughGrams = parseFloat(document.getElementById('sourdoughAddon').value);
+                const sdFlour = hybridSourdoughGrams * sdFlourFactor;
+                prefermentFermentationPower += hybridSourdoughGrams * 0.01; 
+                
+                let sdFlourAdded = hybridSourdoughGrams * sdFlourFactor;
+                finalSalt += sdFlourAdded * (saltPct/100);
+            } else if (calcMode === 'calcTime' && sourdoughMode) {
+                let sdAmount = parseFloat(document.getElementById('amountInputVal').value);
+                prefermentFermentationPower += sdAmount * 0.01;
+            }
+
+            // --- Yeast Calculation ---
             const tempMultiplier = Math.pow(2, (temp - BASE_TEMP) / DOUBLING_TEMP_STEP);
-            
-            let resultValDisplay = "--";
+
             let yeastGramsForRecipe = 0;
-            let finalSourdoughGrams = sourdoughGrams;
+            let resultValDisplay = "--";
 
             if (calcMode === 'calcTime') {
-                let amountInput = parseFloat(document.getElementById('amountInputVal').value);
-                if (isNaN(amountInput) || amountInput < 0) amountInput = 0;
-
-                const amountPct = flour > 0 ? (amountInput / flour) * 100 : 0;
-                document.getElementById('amountPercentDisplay').innerText = amountPct.toFixed(1);
-
-                let totalDryPowerPct = 0;
-
-                if (sourdoughMode) {
-                    finalSourdoughGrams = amountInput;
-                    const sdPct = amountPct; 
-                    totalDryPowerPct = (sdPct * SOURDOUGH_PCT_TO_DRY_YEAST_PCT) * activityFactor;
-                } else {
-                    yeastGramsForRecipe = amountInput;
-                    const yeastPct = amountPct;
-                    // Safe access to map
+                let yeastInput = parseFloat(document.getElementById('amountInputVal').value);
+                let totalYeastPower = prefermentFermentationPower;
+                
+                if (!sourdoughMode) {
+                    yeastGramsForRecipe = yeastInput;
                     const ratio = YEAST_RATIOS_TO_DRY[currentYeastType] || 1.0;
-                    const inputYeastDryEquivPct = yeastPct / ratio;
-                    
-                    const hybridSdPct = flour > 0 ? (sourdoughGrams / flour) * 100 : 0;
-                    const hybridSdContribution = hybridSdPct * SOURDOUGH_PCT_TO_DRY_YEAST_PCT;
-                    totalDryPowerPct = (inputYeastDryEquivPct + hybridSdContribution) * activityFactor;
+                    totalYeastPower += (yeastInput / ratio);
                 }
+                
+                let totalPowerPct = (totalYeastPower / finalTotalFlour) * 100;
+                totalPowerPct *= activityFactor;
 
-                if (totalDryPowerPct <= 0.001) {
+                if (totalPowerPct <= 0.001) {
                     resultValDisplay = "∞";
                 } else {
-                    const effectiveTime = Math.pow((totalDryPowerPct / BASE_DRY_PCT_1H), (1 / TIME_EXPONENT));
+                    const effectiveTime = Math.pow((totalPowerPct / BASE_DRY_PCT_1H), (1 / TIME_EXPONENT));
                     const realHours = effectiveTime / tempMultiplier;
                     
                     if (realHours > 48) resultValDisplay = "> 2 T.";
@@ -825,72 +1053,119 @@
 
             } else {
                 let timeInput = parseFloat(document.getElementById('timeInputVal').value);
-                if (isNaN(timeInput) || timeInput <= 0) timeInput = 0.1;
-                
                 const effectiveTime = timeInput * tempMultiplier;
                 const neededTotalDryPct = (BASE_DRY_PCT_1H * Math.pow(effectiveTime, TIME_EXPONENT)) / activityFactor;
                 
+                let neededTotalDryGrams = (neededTotalDryPct / 100) * finalTotalFlour;
+                
+                let neededYeastGramsDry = neededTotalDryGrams - prefermentFermentationPower;
+                if (neededYeastGramsDry < 0) neededYeastGramsDry = 0;
+
                 if (sourdoughMode) {
-                    const neededSdPct = neededTotalDryPct / SOURDOUGH_PCT_TO_DRY_YEAST_PCT;
-                    const calculatedSdGrams = (neededSdPct / 100) * flour;
-                    finalSourdoughGrams = Math.round(calculatedSdGrams);
-                    resultValDisplay = finalSourdoughGrams;
-                    
-                    const newSdFlour = finalSourdoughGrams * sdFlourFactor;
-                    const newSalt = Math.round((flour + newSdFlour) * (saltPct / 100));
-                    document.getElementById('saltAmount').innerText = newSalt + 'g';
-                    document.getElementById('recSalt').innerText = newSalt;
-
+                    let neededSD = neededYeastGramsDry / 0.01;
+                    resultValDisplay = Math.round(neededSD);
+                    hybridSourdoughGrams = neededSD; 
                 } else {
-                    const hybridSdPct = flour > 0 ? (sourdoughGrams / flour) * 100 : 0;
-                    const hybridSdContribution = hybridSdPct * SOURDOUGH_PCT_TO_DRY_YEAST_PCT;
-                    
-                    let neededYeastDryPct = neededTotalDryPct - hybridSdContribution;
-                    if (neededYeastDryPct < 0) neededYeastDryPct = 0; 
-
                     const ratio = YEAST_RATIOS_TO_DRY[currentYeastType] || 1.0;
-                    const finalYeastPct = neededYeastDryPct * ratio;
-                    const finalGrams = (finalYeastPct / 100) * flour;
-
-                    yeastGramsForRecipe = finalGrams;
-
-                    if (finalGrams < 1 && finalGrams > 0) resultValDisplay = finalGrams.toFixed(2);
-                    else resultValDisplay = finalGrams.toFixed(1);
+                    let finalYeast = neededYeastGramsDry * ratio;
+                    yeastGramsForRecipe = finalYeast;
+                    
+                    if (finalYeast < 1 && finalYeast > 0) resultValDisplay = finalYeast.toFixed(2);
+                    else resultValDisplay = finalYeast.toFixed(1);
                 }
             }
 
+            // --- Update UI ---
             document.getElementById('resultValue').innerText = resultValDisplay;
             
-            const finalSalt = parseInt(document.getElementById('saltAmount').innerText);
-            const totalWeight = flour + water + finalSalt + finalSourdoughGrams + yeastGramsForRecipe;
-            document.getElementById('totalWeightFooter').innerText = Math.round(totalWeight);
-            document.getElementById('recTotal').innerText = Math.round(totalWeight);
+            if (pizzaMode) {
+                document.getElementById('dispFlourPizza').innerText = Math.round(finalMainFlour) + " g";
+            }
+            
+            document.getElementById('waterAmount').innerText = Math.round(finalMainWater) + 'g';
+            document.getElementById('saltAmount').innerText = Math.round(finalSalt) + 'g';
 
-            document.getElementById('recFlour').innerText = flour;
-            document.getElementById('recWater').innerText = water;
-            document.getElementById('recHydration').innerText = hydration + "%";
-            document.getElementById('recSalt').innerText = finalSalt;
-            document.getElementById('recSaltPct').innerText = saltPct + "%";
-            document.getElementById('recSourdough').innerText = finalSourdoughGrams;
-            document.getElementById('recSdHydration').innerText = sdHydration;
+            // Recipe
+            document.getElementById('recFlour').innerText = Math.round(finalMainFlour);
+            document.getElementById('recWater').innerText = Math.round(finalMainWater);
+            document.getElementById('recSalt').innerText = Math.round(finalSalt);
             
+            // Render Preferment Recipes
+            const prefContainer = document.getElementById('prefermentRecipeContainer');
+            const mainHeader = document.getElementById('mainDoughHeader');
+            
+            prefContainer.innerHTML = '';
+            
+            if (prefermentRecipes.length > 0) {
+                prefContainer.classList.remove('hidden');
+                mainHeader.classList.remove('hidden'); // Show "Hauptteig" header
+                
+                prefermentRecipes.forEach(p => {
+                    // Header
+                    prefContainer.innerHTML += `<h4 class="text-amber-500 font-bold mb-2 text-sm uppercase tracking-wider border-b border-gray-700 pb-1 mt-4 first:mt-0">${p.label}</h4>`;
+                    
+                    // Flour Row
+                    prefContainer.innerHTML += `
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-amber-600 mb-3">
+                        <span class="text-gray-300">Mehl</span>
+                        <span class="font-bold text-white">${Math.round(p.flour)} g</span>
+                    </div>`;
+                    
+                    // Water Row
+                    prefContainer.innerHTML += `
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-blue-600 mb-3">
+                        <span class="text-gray-300">Wasser</span>
+                        <span class="font-bold text-white">${Math.round(p.water)} g</span>
+                    </div>`;
+                    
+                    // Yeast Prise Row
+                    prefContainer.innerHTML += `
+                    <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-600 mb-3">
+                        <span class="text-gray-300">Hefe</span>
+                        <span class="italic text-gray-500 text-base">Prise</span>
+                    </div>`;
+                });
+            } else {
+                prefContainer.classList.add('hidden');
+                mainHeader.classList.add('hidden');
+            }
+
+            // Render Extras (Oil) in Recipe
+            const extrasContainer = document.getElementById('recipeExtras');
+            extrasContainer.innerHTML = '';
+            extrasRecipeData.forEach(e => {
+                extrasContainer.innerHTML += `
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-purple-500">
+                    <span class="text-gray-300">${e.label}</span>
+                    <span class="font-bold text-white">${Math.round(e.grams)} g</span>
+                </div>`;
+            });
+
+            // Update Total Weight
+            let totalWeight = finalMainFlour + finalMainWater + finalSalt + hybridSourdoughGrams + yeastGramsForRecipe;
+            prefermentRecipes.forEach(p => totalWeight += (p.flour + p.water));
+            extrasRecipeData.forEach(e => totalWeight += e.grams);
+            
+            document.getElementById('recTotal').innerText = Math.round(totalWeight);
+            document.getElementById('totalWeightFooter').innerText = Math.round(totalWeight);
+            
+            // Hybrid SD in Recipe
             const rowSourdoughRec = document.getElementById('rowSourdoughRec');
+            if(hybridSourdoughGrams > 0) {
+                rowSourdoughRec.classList.remove('hidden');
+                document.getElementById('recSourdough').innerText = Math.round(hybridSourdoughGrams);
+                if(sourdoughMode) document.getElementById('recSourdoughPlus').style.display = 'none';
+                else document.getElementById('recSourdoughPlus').style.display = 'inline';
+            } else {
+                rowSourdoughRec.classList.add('hidden');
+            }
             
+            // Yeast in Recipe
             if (sourdoughMode) {
                  document.getElementById('recYeast').innerText = "0";
-                 rowSourdoughRec.classList.remove('hidden');
-                 document.getElementById('recSourdoughPlus').style.display = 'none';
             } else {
                  document.getElementById('recYeast').innerText = parseFloat(yeastGramsForRecipe).toFixed(2);
                  document.getElementById('recYeastType').innerText = yeastTypeLabel(currentYeastType);
-                 
-                 // Show row ONLY if hybrid is toggled on (and we are in yeast mode)
-                 if(hybridToggle.checked) {
-                     rowSourdoughRec.classList.remove('hidden');
-                     document.getElementById('recSourdoughPlus').style.display = 'inline';
-                 } else {
-                     rowSourdoughRec.classList.add('hidden');
-                 }
             }
 
             if (pizzaMode) {
@@ -938,7 +1213,7 @@
 
         // Initialize
         setYeastType('dry');
-        togglePizzaMode(); 
+        setDoughMode('bread');
         updateCalculation();
 
     </script>
