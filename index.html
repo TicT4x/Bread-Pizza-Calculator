@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Teig-Gehzeit Rechner</title>
+    <meta name="description" content="Der smarte Rechner für Teig-Gehzeiten und Hefemengen.">
+    
+    <!-- PWA / Mobile App Settings -->
+    <title>Teig-Meister</title>
+    <meta name="apple-mobile-web-app-title" content="Teig-Meister">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1f2937">
+
+    <!-- Embedded Icon (SVG) for Favicon and Apple Touch Icon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23f59e0b%22/><path d=%22M20 65 Q20 35 50 35 Q80 35 80 65 L80 75 Q80 85 50 85 Q20 85 20 75 Z%22 fill=%22white%22/><path d=%22M30 45 L40 55 M50 40 L50 55 M70 45 L60 55%22 stroke=%22%23f59e0b%22 stroke-width=%223%22 stroke-linecap=%22round%22/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23f59e0b%22/><path d=%22M20 65 Q20 35 50 35 Q80 35 80 65 L80 75 Q80 85 50 85 Q20 85 20 75 Z%22 fill=%22white%22/><path d=%22M30 45 L40 55 M50 40 L50 55 M70 45 L60 55%22 stroke=%22%23f59e0b%22 stroke-width=%223%22 stroke-linecap=%22round%22/></svg>">
+
+    <!-- Embedded Manifest for Android Install -->
+    <link rel="manifest" href='data:application/manifest+json;base64,ewogICJuYW1lIjogIlRlaWctTWVpc3RlciIsCiAgInNob3J0X25hbWUiOiAiVGVpZy1NZWlzdGVyIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxZjI5MzciLAogICJ0aGVtZV9jb2xvciI6ICIjMWYyOTM3IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCc+PHJlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIHJ4PScyMCcgZmlsbD0nI2Y1OWUwYicvPjxwYXRoIGQ9J00yMCA2NSBRMjAgMzUgNTAgMzUgUTgwIDM1IDgwIDY1IEw4MCA3NSBRODAgODUgNTAgODUgUTIwIDg1IDIwIDc1IFonIGZpbGw9J3doaXRlJy8+PHBhdGggZD0nTTMwIDQ1IEw0MCA1NSBNNTAgNDAgTDUwIDU1IE03MCA0NSBMNjAgNTUnIHN0cm9rZT0nI2Y1OWUwYicgc3Ryb2tlLXdpZHRoPSczJyBzdHJva2UtbGluZWNhcD0ncm91bmQnLz48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9'>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Updated Font Awesome to 6.4.0 for better icon support -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -49,6 +64,7 @@
         /* Footer Animation */
         #footerPanel {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-bottom: env(safe-area-inset-bottom); /* iOS Safe Area */
         }
         .footer-expanded {
             transform: translateY(0) !important;
@@ -60,12 +76,16 @@
         #settingsModal {
             transition: opacity 0.2s ease-in-out;
         }
+        /* Prevent bounce scroll on iOS */
+        body {
+            overscroll-behavior-y: none;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen overflow-hidden relative">
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen overflow-hidden relative selection:bg-amber-500 selection:text-white">
 
     <!-- Header -->
-    <header class="bg-gray-800 p-3 sticky top-0 z-10 shadow-lg border-b border-gray-700">
+    <header class="bg-gray-800 p-3 sticky top-0 z-10 shadow-lg border-b border-gray-700 pt-[env(safe-area-inset-top,20px)]">
         <div class="flex items-center justify-between max-w-md mx-auto">
             <h1 class="text-lg font-bold text-amber-500"><i class="fa-solid fa-bread-slice mr-2"></i>Teig-Meister</h1>
             <div class="flex space-x-3">
@@ -76,7 +96,7 @@
     </header>
 
     <!-- Scrollable Content Area -->
-    <div class="overflow-y-auto h-[calc(100vh-70px)] pb-32">
+    <div class="overflow-y-auto h-[calc(100vh-70px)] pb-32 overscroll-contain">
         <main class="max-w-md mx-auto p-3 space-y-5">
 
             <!-- Mode Switcher (Time vs Yeast) -->
