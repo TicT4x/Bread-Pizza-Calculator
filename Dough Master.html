@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Teig-Gehzeit Rechner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #f59e0b; /* Amber 500 */
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #4b5563;
+            border-radius: 2px;
+        }
+        /* Hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        .mode-active {
+            background-color: #f59e0b;
+            color: white;
+            font-weight: bold;
+        }
+        .mode-inactive {
+            background-color: #374151;
+            color: #9ca3af;
+        }
+        /* Footer Animation */
+        #footerPanel {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .footer-expanded {
+            transform: translateY(0) !important;
+        }
+        .footer-collapsed {
+            transform: translateY(calc(100% - 85px)); /* Show only header (approx 85px) */
+        }
+        /* Modal Animation */
+        #settingsModal {
+            transition: opacity 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen overflow-hidden relative">
+
+    <!-- Header -->
+    <header class="bg-gray-800 p-4 sticky top-0 z-10 shadow-lg border-b border-gray-700">
+        <div class="flex items-center justify-between max-w-md mx-auto">
+            <h1 class="text-xl font-bold text-amber-500"><i class="fa-solid fa-bread-slice mr-2"></i>Teig-Meister</h1>
+            <div class="flex space-x-3">
+                <button onclick="resetValues()" class="text-xs bg-gray-700 px-3 py-1 rounded text-gray-300 hover:bg-gray-600">Reset</button>
+                <button onclick="toggleSettings()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-gear text-xl"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Scrollable Content Area -->
+    <div class="overflow-y-auto h-[calc(100vh-80px)] pb-32">
+        <main class="max-w-md mx-auto p-4 space-y-6">
+
+            <!-- Mode Switcher (Time vs Yeast) -->
+            <div class="bg-gray-800 p-1 rounded-lg flex text-sm shadow-md">
+                <button id="btnModeYeast" onclick="setCalcMode('calcYeast')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-active">
+                    <i class="fa-regular fa-clock mr-1"></i> Wunschzeit
+                </button>
+                <button id="btnModeTime" onclick="setCalcMode('calcTime')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-inactive">
+                    <i class="fa-solid fa-cube mr-1"></i> Menge?
+                </button>
+            </div>
+
+            <!-- Pizza Mode Toggle -->
+            <div class="flex items-center justify-between bg-gray-800/50 p-2 rounded-lg border border-gray-700">
+                <span class="text-sm text-gray-300 ml-2"><i class="fa-solid fa-pizza-slice mr-2"></i>Pizza Modus</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="pizzaModeToggle" class="sr-only peer" onchange="togglePizzaMode()">
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
+            </div>
+
+            <!-- Base Ingredients Section -->
+            <section class="space-y-4">
+                <h2 class="text-sm uppercase tracking-wider text-gray-500 font-semibold border-b border-gray-700 pb-1">Basis</h2>
+                
+                <!-- Pizza Inputs (Hidden by default) -->
+                <div id="pizzaInputs" class="hidden grid grid-cols-2 gap-4">
+                    <div class="bg-gray-800 p-3 rounded-xl border border-amber-500/50">
+                        <label class="text-xs text-gray-400 block mb-1">Gewicht pro Ballen</label>
+                        <div class="flex items-center">
+                            <input type="number" id="ballWeight" value="280" class="w-full bg-transparent text-xl font-bold text-white outline-none" oninput="updateCalculation()">
+                            <span class="text-amber-500 text-sm">g</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-3 rounded-xl border border-amber-500/50">
+                        <label class="text-xs text-gray-400 block mb-1">Anzahl Ballen</label>
+                        <div class="flex items-center">
+                            <input type="number" id="ballCount" value="4" class="w-full bg-transparent text-xl font-bold text-white outline-none" oninput="updateCalculation()">
+                            <span class="text-amber-500 text-sm">Stk</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mehl (Shown in Manual Mode) -->
+                <div id="flourContainer" class="bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-700">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-gray-300"><i class="fa-solid fa-wheat-awn w-6"></i>Mehlmenge</label>
+                        <span class="text-amber-500 font-mono" id="dispFlour">500 g</span>
+                    </div>
+                    <input type="range" id="flour" min="100" max="2000" step="10" value="500" oninput="updateCalculation()">
+                </div>
+                
+                <!-- Display Calculated Flour (Shown in Pizza Mode) -->
+                <div id="flourDisplayOnly" class="hidden bg-gray-800/50 p-4 rounded-xl border border-gray-700 border-dashed">
+                    <div class="flex justify-between items-center">
+                        <label class="text-gray-400"><i class="fa-solid fa-calculator w-6"></i>Benötigtes Mehl</label>
+                        <span class="text-white font-bold text-xl" id="dispFlourPizza">-- g</span>
+                    </div>
+                </div>
+
+                <!-- Hydration -->
+                <div class="bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-700">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-gray-300"><i class="fa-solid fa-droplet w-6"></i>Hydration</label>
+                        <span class="text-amber-500 font-mono" id="dispHydration">65%</span>
+                    </div>
+                    <input type="range" id="hydration" min="40" max="100" step="1" value="65" oninput="updateCalculation()">
+                    <div class="text-xs text-gray-500 mt-1 text-right">Wasser: <span id="waterAmount">325</span>g</div>
+                </div>
+
+                 <!-- Salz -->
+                 <div class="bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-700">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-gray-300"><i class="fa-solid fa-shaker w-6"></i>Salz</label>
+                        <span class="text-amber-500 font-mono" id="dispSalt">2.0%</span>
+                    </div>
+                    <input type="range" id="salt" min="0" max="4" step="0.1" value="2.0" oninput="updateCalculation()">
+                    <div class="text-xs text-gray-500 mt-1 text-right"><span id="saltAmount">10</span>g</div>
+                </div>
+            </section>
+
+            <!-- Environment Section -->
+            <section class="space-y-4">
+                <h2 class="text-sm uppercase tracking-wider text-gray-500 font-semibold border-b border-gray-700 pb-1">Umgebung & Kultur</h2>
+
+                <!-- Temperatur -->
+                <div class="bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-700 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-blue-500 via-green-500 to-red-500 opacity-50"></div>
+                    <div class="flex justify-between mb-2">
+                        <label class="text-gray-300"><i class="fa-solid fa-temperature-half w-6"></i>Teigtemperatur</label>
+                        <span class="text-amber-500 font-mono" id="dispTemp">20°C</span>
+                    </div>
+                    <input type="range" id="temp" min="4" max="35" step="0.5" value="20" oninput="updateCalculation()">
+                    <div class="text-xs text-gray-500 mt-1 flex justify-between">
+                        <span>Kühlschrank</span>
+                        <span>Warm</span>
+                    </div>
+                </div>
+
+                <!-- Sauerteig (Hybrid Add-On) - Only visible if NOT in Sourdough Only Mode -->
+                <div id="hybridSourdoughContainer" class="bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-700">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-gray-300"><i class="fa-solid fa-jar w-6"></i>Sauerteig (Add-On)</label>
+                        <span class="text-amber-500 font-mono" id="dispSourdoughAddon">0 g</span>
+                    </div>
+                    <input type="range" id="sourdoughAddon" min="0" max="300" step="10" value="0" oninput="updateCalculation()">
+                    <div class="text-xs text-gray-500 mt-1">
+                        Wird zum Teig hinzugefügt
+                    </div>
+                </div>
+            </section>
+
+            <!-- Triebmittel Settings -->
+            <section class="space-y-4">
+                <div class="flex justify-between items-center border-b border-gray-700 pb-1">
+                    <h2 class="text-sm uppercase tracking-wider text-gray-500 font-semibold">Triebmittel</h2>
+                    <!-- Sourdough Toggle -->
+                    <label class="flex items-center cursor-pointer">
+                        <span class="text-xs text-gray-400 mr-2">Nur Sauerteig</span>
+                        <div class="relative">
+                            <input type="checkbox" id="onlySourdoughToggle" class="sr-only peer" onchange="toggleSourdoughMode()">
+                            <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+                        </div>
+                    </label>
+                </div>
+                
+                <!-- Yeast Type Selector (Hidden in Sourdough Mode) -->
+                <div id="yeastTypeContainer" class="flex space-x-2 mb-2">
+                    <select id="yeastType" onchange="updateCalculation()" class="w-full bg-gray-700 text-white p-3 rounded-lg border border-gray-600 focus:outline-none focus:border-amber-500">
+                        <option value="dry">Trockenhefe (Tütchen)</option>
+                        <option value="fresh">Frischhefe (Würfel)</option>
+                        <option value="instant">Instanthefe</option>
+                    </select>
+                </div>
+
+                <!-- INPUT: Amount (Yeast OR Sourdough) - Visible in Mode "Menge?" (calcTime) -->
+                <div id="inputAmountGroup" class="bg-gray-800 p-4 rounded-xl shadow-sm border border-amber-500/30 hidden">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-gray-300" id="labelAmountInput">Hefemenge (g)</label>
+                        <div class="flex items-center">
+                            <input type="number" id="amountInputVal" value="3.5" step="0.1" class="w-20 bg-gray-900 text-right p-1 rounded border border-gray-600 focus:border-amber-500 outline-none text-amber-500 font-mono" oninput="updateCalculation()">
+                            <span class="ml-2 text-gray-400">g</span>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500 text-right">
+                        Entspricht <span id="amountPercentDisplay">0.7</span>% vom Mehl
+                    </div>
+                </div>
+
+                <!-- INPUT: Desired Time (Visible in Mode "Wunschzeit" - calcYeast) -->
+                <div id="inputTimeGroup" class="bg-gray-800 p-4 rounded-xl shadow-sm border border-amber-500/30">
+                    <div class="flex justify-between mb-2">
+                        <label class="text-gray-300">Wunschzeit</label>
+                        <div class="flex items-center">
+                            <input type="number" id="timeInputVal" value="4" step="0.5" class="w-20 bg-gray-900 text-right p-1 rounded border border-gray-600 focus:border-amber-500 outline-none text-amber-500 font-mono" oninput="updateCalculation()">
+                            <span class="ml-2 text-gray-400">Std.</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">Gesamte Gehzeit (Stock- & Stückgare)</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SETTINGS MODAL (Hidden) -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0" onclick="toggleSettings()">
+        <div class="bg-gray-800 p-6 rounded-2xl w-11/12 max-w-sm shadow-2xl border border-gray-600" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white">Einstellungen</h3>
+                <button onclick="toggleSettings()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            </div>
+            
+            <!-- Activity Calibration -->
+            <div class="mb-4">
+                <label class="text-sm text-gray-300 block mb-2"><i class="fa-solid fa-gauge-high mr-2"></i>Triebkraft Kalibrierung</label>
+                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-amber-500 font-mono text-xs" id="dispActivity">Normal</span>
+                    </div>
+                    <input type="range" id="activity" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updateCalculation()">
+                    <div class="text-xs text-gray-500 mt-1 flex justify-between">
+                        <span>Träge</span>
+                        <span>Turbo</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Passe diesen Wert an, falls dein Teig regelmäßig schneller oder langsamer ist als berechnet.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPANDABLE RESULT FOOTER -->
+    <div id="footerPanel" class="fixed bottom-0 left-0 right-0 h-[80vh] bg-gray-900 border-t border-gray-700 shadow-[0_-5px_25px_rgba(0,0,0,0.8)] z-30 footer-collapsed rounded-t-2xl flex flex-col">
+        
+        <!-- Drag Handle / Header -->
+        <div class="h-[85px] w-full cursor-pointer bg-gray-800/80 backdrop-blur hover:bg-gray-800 transition-colors rounded-t-2xl border-b border-gray-700 flex-none" onclick="toggleFooter()">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mt-3 mb-2"></div>
+            
+            <!-- Collapsed View Content -->
+            <div class="px-6 flex justify-between items-center h-[50px]">
+                <div>
+                    <p class="text-gray-400 text-xs uppercase" id="resultLabel">Benötigte Hefe</p>
+                    <div class="text-3xl font-bold text-white leading-none flex items-baseline">
+                        <span id="resultValue">--</span>
+                        <span class="text-base text-amber-500 font-normal ml-1" id="resultUnit">g</span>
+                        <i id="chevronIcon" class="fa-solid fa-chevron-up text-gray-500 text-sm ml-3 transition-transform"></i>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-gray-500 text-xs">Gesamtgewicht</p>
+                    <p class="text-lg font-mono text-gray-300"><span id="totalWeightFooter">0</span>g</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expanded Content (Recipe) -->
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-900">
+            <h3 class="text-xl font-bold text-amber-500 mb-6 flex items-center">
+                <i class="fa-solid fa-list-check mr-3"></i>Rezept
+            </h3>
+            
+            <div class="space-y-3 font-mono text-lg">
+                <!-- Mehl -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-amber-500">
+                    <span class="text-gray-300">Mehl</span>
+                    <span class="font-bold text-white"><span id="recFlour">0</span> g</span>
+                </div>
+
+                <!-- Wasser -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-blue-500">
+                    <div>
+                        <span class="text-gray-300 block">Wasser</span>
+                        <span class="text-xs text-gray-500" id="recHydration">65%</span>
+                    </div>
+                    <span class="font-bold text-white"><span id="recWater">0</span> g</span>
+                </div>
+
+                <!-- Salz -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-gray-400">
+                     <div>
+                        <span class="text-gray-300 block">Salz</span>
+                        <span class="text-xs text-gray-500" id="recSaltPct">2%</span>
+                    </div>
+                    <span class="font-bold text-white"><span id="recSalt">0</span> g</span>
+                </div>
+
+                <!-- Sauerteig -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-green-600" id="rowSourdoughRec">
+                    <span class="text-gray-300">Sauerteig</span>
+                    <span class="font-bold text-white">+ <span id="recSourdough">0</span> g</span>
+                </div>
+
+                <!-- Hefe -->
+                <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-200" id="rowYeastRec">
+                    <div>
+                        <span class="text-gray-300 block">Hefe (<span id="recYeastType">Trocken</span>)</span>
+                    </div>
+                    <span class="font-bold text-amber-400"><span id="recYeast">0</span> g</span>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-700 flex justify-between text-gray-400 text-sm">
+                    <span>Teigmasse Gesamt:</span>
+                    <span class="font-bold text-white"><span id="recTotal">0</span> g</span>
+                </div>
+                
+                <!-- Pizza Count Info -->
+                <div id="recPizzaInfo" class="hidden mt-2 text-right text-xs text-gray-500">
+                    <span id="recBallCount">4</span> Ballen à <span id="recBallWeight">280</span>g
+                </div>
+            </div>
+            
+            <button onclick="toggleFooter()" class="w-full mt-8 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg border border-gray-700">
+                Schließen
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let calcMode = 'calcYeast'; // 'calcTime' or 'calcYeast'
+        let pizzaMode = false;
+        let sourdoughMode = false;
+        let isFooterOpen = false;
+
+        // Constants
+        const BASE_TEMP = 20; 
+        const BASE_DRY_PCT_1H = 3.5; 
+        const TIME_EXPONENT = -1.45; 
+        const DOUBLING_TEMP_STEP = 5.0; 
+
+        const YEAST_RATIOS_TO_DRY = {
+            'dry': 1.0,
+            'fresh': 3.0,
+            'instant': 1.0 
+        };
+
+        const SOURDOUGH_PCT_TO_DRY_YEAST_PCT = 0.01; 
+
+        // Swipe handling for footer
+        const footer = document.getElementById('footerPanel');
+        let touchStartY = 0;
+        
+        footer.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+        
+        footer.addEventListener('touchend', e => {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            if (diff > 50 && !isFooterOpen) toggleFooter();
+            if (diff < -50 && isFooterOpen) toggleFooter();
+        }, {passive: true});
+
+
+        function toggleSettings() {
+            const modal = document.getElementById('settingsModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            } else {
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+        }
+
+        function toggleFooter() {
+            isFooterOpen = !isFooterOpen;
+            const panel = document.getElementById('footerPanel');
+            const icon = document.getElementById('chevronIcon');
+            
+            if (isFooterOpen) {
+                panel.classList.remove('footer-collapsed');
+                panel.classList.add('footer-expanded');
+                icon.style.transform = "rotate(180deg)";
+            } else {
+                panel.classList.add('footer-collapsed');
+                panel.classList.remove('footer-expanded');
+                icon.style.transform = "rotate(0deg)";
+            }
+        }
+
+        function togglePizzaMode() {
+            pizzaMode = document.getElementById('pizzaModeToggle').checked;
+            const pizzaInputs = document.getElementById('pizzaInputs');
+            const flourContainer = document.getElementById('flourContainer');
+            const flourDisplayOnly = document.getElementById('flourDisplayOnly');
+            const recPizzaInfo = document.getElementById('recPizzaInfo');
+
+            if (pizzaMode) {
+                pizzaInputs.classList.remove('hidden');
+                flourContainer.classList.add('hidden');
+                flourDisplayOnly.classList.remove('hidden');
+                recPizzaInfo.classList.remove('hidden');
+            } else {
+                pizzaInputs.classList.add('hidden');
+                flourContainer.classList.remove('hidden');
+                flourDisplayOnly.classList.add('hidden');
+                recPizzaInfo.classList.add('hidden');
+            }
+            updateCalculation();
+        }
+
+        function toggleSourdoughMode() {
+            sourdoughMode = document.getElementById('onlySourdoughToggle').checked;
+            
+            const yeastTypeContainer = document.getElementById('yeastTypeContainer');
+            const hybridSourdoughContainer = document.getElementById('hybridSourdoughContainer');
+            const rowYeastRec = document.getElementById('rowYeastRec');
+            const btnModeTime = document.getElementById('btnModeTime');
+            
+            if (sourdoughMode) {
+                yeastTypeContainer.classList.add('hidden');
+                hybridSourdoughContainer.classList.add('hidden'); // Hide addon slider
+                rowYeastRec.classList.add('hidden'); // Hide yeast in recipe
+                btnModeTime.innerHTML = '<i class="fa-solid fa-cube mr-1"></i> Menge?';
+            } else {
+                yeastTypeContainer.classList.remove('hidden');
+                hybridSourdoughContainer.classList.remove('hidden');
+                rowYeastRec.classList.remove('hidden');
+                btnModeTime.innerHTML = '<i class="fa-solid fa-cube mr-1"></i> Hefemenge';
+            }
+            
+            setCalcMode(calcMode); // Re-trigger UI updates for labels
+        }
+
+        function setCalcMode(newMode) {
+            calcMode = newMode;
+            
+            const btnTime = document.getElementById('btnModeTime'); // Input Amount (Yeast/Sourdough)
+            const btnYeast = document.getElementById('btnModeYeast'); // Input Time
+            const inputAmountGroup = document.getElementById('inputAmountGroup');
+            const groupTime = document.getElementById('inputTimeGroup');
+            const resultLabel = document.getElementById('resultLabel');
+            const resultUnit = document.getElementById('resultUnit');
+            const labelAmountInput = document.getElementById('labelAmountInput');
+
+            if (calcMode === 'calcTime') {
+                // User enters Amount -> wants Time
+                btnTime.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-active";
+                btnYeast.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-inactive";
+                inputAmountGroup.classList.remove('hidden');
+                groupTime.classList.add('hidden');
+                resultLabel.innerText = "Geschätzte Gehzeit";
+                resultUnit.innerText = "Std.";
+
+                // Update input label based on Sourdough Mode
+                if (sourdoughMode) {
+                    labelAmountInput.innerText = "Sauerteig (g)";
+                    // Default value if 0
+                    if(parseFloat(document.getElementById('amountInputVal').value) < 5) {
+                         document.getElementById('amountInputVal').value = 100;
+                    }
+                } else {
+                    labelAmountInput.innerText = "Hefemenge (g)";
+                }
+
+            } else {
+                // User enters Time -> wants Amount (Default)
+                btnTime.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-inactive";
+                btnYeast.className = "flex-1 py-2 rounded-md transition-all duration-200 mode-active";
+                inputAmountGroup.classList.add('hidden');
+                groupTime.classList.remove('hidden');
+                
+                if (sourdoughMode) {
+                    resultLabel.innerText = "Benötigter Sauerteig";
+                } else {
+                    resultLabel.innerText = "Benötigte Hefe";
+                }
+                resultUnit.innerText = "g";
+            }
+            updateCalculation();
+        }
+
+        function updateCalculation() {
+            // 1. Determine Flour Amount
+            let flour = 500;
+            const hydration = parseFloat(document.getElementById('hydration').value);
+            const saltPct = parseFloat(document.getElementById('salt').value);
+            
+            // In hybrid mode, read from slider. In pure mode, slider is hidden but we might calc it later.
+            let sourdoughGrams = 0;
+            if (!sourdoughMode) {
+                sourdoughGrams = parseFloat(document.getElementById('sourdoughAddon').value);
+            }
+            
+            // Pizza Mode Logic
+            if (pizzaMode) {
+                const ballWeight = parseFloat(document.getElementById('ballWeight').value) || 280;
+                const ballCount = parseFloat(document.getElementById('ballCount').value) || 4;
+                const totalTarget = ballWeight * ballCount;
+                
+                // If Sourdough Mode AND we are calculating amount, we don't know Sourdough yet.
+                // It's circular. Let's assume Sourdough is ~20% for weight estimation initially or 0.
+                // Simple approach: Ignore sourdough weight in total target initially, then refine?
+                // Or: Total = Flour + Water + Salt + Sourdough.
+                // If Sourdough Mode & CalcYeast: Sourdough is Result.
+                // We'll treat Sourdough as 0 for flour calc in pure Sourdough mode, then add it on top?
+                // No, that changes total weight.
+                // Let's use the Hybrid slider value for flour calc if NOT in Sourdough Mode.
+                
+                // If in Sourdough Mode, we can't subtract Sourdough from target before knowing it.
+                // So: Standard Pizza Formula without preferment subtraction first.
+                // F = Target / (1 + H + S)
+                
+                const factor = 1 + (hydration / 100) + (saltPct / 100);
+                
+                let calculatedFlour = totalTarget / factor;
+                if (!sourdoughMode) {
+                    // Subtract known sourdough addon
+                     calculatedFlour = (totalTarget - sourdoughGrams) / factor;
+                }
+                
+                if (calculatedFlour < 0) calculatedFlour = 0;
+                flour = Math.round(calculatedFlour);
+                document.getElementById('dispFlourPizza').innerText = flour + " g";
+            } else {
+                flour = parseFloat(document.getElementById('flour').value);
+                document.getElementById('dispFlour').innerText = flour + ' g';
+            }
+
+            // 2. Common Inputs
+            const temp = parseFloat(document.getElementById('temp').value);
+            const yeastType = document.getElementById('yeastType').value;
+            const activityFactor = parseFloat(document.getElementById('activity').value);
+            
+            // 3. Update UI Labels
+            let actText = "Normal";
+            if(activityFactor < 0.8) actText = "Sehr langsam";
+            else if(activityFactor < 1.0) actText = "Langsam";
+            else if(activityFactor > 1.2) actText = "Sehr aktiv";
+            else if(activityFactor > 1.0) actText = "Aktiv";
+            document.getElementById('dispActivity').innerText = actText + ` (${Math.round(activityFactor*100)}%)`;
+
+            document.getElementById('dispHydration').innerText = hydration + '%';
+            document.getElementById('dispSalt').innerText = saltPct + '%';
+            document.getElementById('dispTemp').innerText = temp + '°C';
+            if(!sourdoughMode) {
+                 document.getElementById('dispSourdoughAddon').innerText = sourdoughGrams + ' g';
+            }
+
+            // 4. Derived Ingredients
+            const water = Math.round(flour * (hydration / 100));
+            const salt = Math.round(flour * (saltPct / 100));
+            
+            // 5. Physics Engine
+            const tempMultiplier = Math.pow(2, (temp - BASE_TEMP) / DOUBLING_TEMP_STEP);
+            
+            let resultValDisplay = "--";
+            let yeastGramsForRecipe = 0;
+            let finalSourdoughGrams = sourdoughGrams;
+
+            // --- MAIN CALCULATION ---
+
+            if (calcMode === 'calcTime') {
+                // INPUT: Amount -> OUTPUT: Time
+                let amountInput = parseFloat(document.getElementById('amountInputVal').value);
+                if (isNaN(amountInput) || amountInput < 0) amountInput = 0;
+
+                // Display %
+                const amountPct = flour > 0 ? (amountInput / flour) * 100 : 0;
+                document.getElementById('amountPercentDisplay').innerText = amountPct.toFixed(1);
+
+                let totalDryPowerPct = 0;
+
+                if (sourdoughMode) {
+                    // Input is Sourdough Grams
+                    finalSourdoughGrams = amountInput;
+                    const sdPct = amountPct; 
+                    // Convert Sourdough % to Dry Yeast Equiv
+                    totalDryPowerPct = (sdPct * SOURDOUGH_PCT_TO_DRY_YEAST_PCT) * activityFactor;
+                } else {
+                    // Input is Yeast Grams. Add Hybrid Sourdough contribution.
+                    yeastGramsForRecipe = amountInput;
+                    const yeastPct = amountPct;
+                    const inputYeastDryEquivPct = yeastPct / YEAST_RATIOS_TO_DRY[yeastType];
+                    
+                    const hybridSdPct = flour > 0 ? (sourdoughGrams / flour) * 100 : 0;
+                    const hybridSdContribution = hybridSdPct * SOURDOUGH_PCT_TO_DRY_YEAST_PCT;
+                    
+                    totalDryPowerPct = (inputYeastDryEquivPct + hybridSdContribution) * activityFactor;
+                }
+
+                if (totalDryPowerPct <= 0.001) {
+                    resultValDisplay = "∞";
+                } else {
+                    const effectiveTime = Math.pow((totalDryPowerPct / BASE_DRY_PCT_1H), (1 / TIME_EXPONENT));
+                    const realHours = effectiveTime / tempMultiplier;
+                    
+                    if (realHours > 48) resultValDisplay = "> 2 T.";
+                    else if (realHours > 24) resultValDisplay = (realHours / 24).toFixed(1) + " T.";
+                    else {
+                        const h = Math.floor(realHours);
+                        const m = Math.round((realHours - h) * 60);
+                        resultValDisplay = `${h}:${m.toString().padStart(2, '0')}`;
+                    }
+                }
+
+            } else {
+                // INPUT: Time -> OUTPUT: Amount
+                let timeInput = parseFloat(document.getElementById('timeInputVal').value);
+                if (isNaN(timeInput) || timeInput <= 0) timeInput = 0.1;
+                
+                const effectiveTime = timeInput * tempMultiplier;
+                const neededTotalDryPct = (BASE_DRY_PCT_1H * Math.pow(effectiveTime, TIME_EXPONENT)) / activityFactor;
+                
+                if (sourdoughMode) {
+                    // Needed Total is purely Sourdough
+                    // NeededSD% * 0.01 = NeededDry%
+                    // NeededSD% = NeededDry% / 0.01
+                    const neededSdPct = neededTotalDryPct / SOURDOUGH_PCT_TO_DRY_YEAST_PCT;
+                    const calculatedSdGrams = (neededSdPct / 100) * flour;
+                    finalSourdoughGrams = Math.round(calculatedSdGrams);
+                    resultValDisplay = finalSourdoughGrams;
+                } else {
+                    // Hybrid Mode: Subtract Sourdough contribution
+                    const hybridSdPct = flour > 0 ? (sourdoughGrams / flour) * 100 : 0;
+                    const hybridSdContribution = hybridSdPct * SOURDOUGH_PCT_TO_DRY_YEAST_PCT;
+                    
+                    let neededYeastDryPct = neededTotalDryPct - hybridSdContribution;
+                    if (neededYeastDryPct < 0) neededYeastDryPct = 0; 
+
+                    const selectedYeastRatio = YEAST_RATIOS_TO_DRY[yeastType];
+                    const finalYeastPct = neededYeastDryPct * selectedYeastRatio;
+                    const finalGrams = (finalYeastPct / 100) * flour;
+
+                    yeastGramsForRecipe = finalGrams;
+
+                    if (finalGrams < 1 && finalGrams > 0) resultValDisplay = finalGrams.toFixed(2);
+                    else resultValDisplay = finalGrams.toFixed(1);
+                }
+            }
+
+            // 6. Final Outputs
+            document.getElementById('resultValue').innerText = resultValDisplay;
+            
+            // Total Weight
+            // Note: If Pizza Mode was active & Sourdough Mode was active, we didn't subtract SD from flour calc 
+            // because we didn't know it. So Total Weight will be slightly higher than Target in that specific edge case.
+            const totalWeight = flour + water + salt + finalSourdoughGrams + yeastGramsForRecipe;
+            document.getElementById('totalWeightFooter').innerText = Math.round(totalWeight);
+            document.getElementById('recTotal').innerText = Math.round(totalWeight);
+
+            // Recipe Update
+            document.getElementById('recFlour').innerText = flour;
+            document.getElementById('recWater').innerText = water;
+            document.getElementById('recHydration').innerText = hydration + "%";
+            document.getElementById('recSalt').innerText = salt;
+            document.getElementById('recSaltPct').innerText = saltPct + "%";
+            document.getElementById('recSourdough').innerText = finalSourdoughGrams;
+            
+            if (sourdoughMode) {
+                 // Already hidden via CSS toggle, but just in case
+                 document.getElementById('recYeast').innerText = "0";
+            } else {
+                 document.getElementById('recYeast').innerText = parseFloat(yeastGramsForRecipe).toFixed(2);
+                 document.getElementById('recYeastType').innerText = yeastTypeLabel(yeastType);
+            }
+
+            if (pizzaMode) {
+                document.getElementById('recBallWeight').innerText = document.getElementById('ballWeight').value;
+                document.getElementById('recBallCount').innerText = document.getElementById('ballCount').value;
+            }
+        }
+
+        function yeastTypeLabel(type) {
+            if (type === 'fresh') return 'Frisch';
+            if (type === 'dry') return 'Trocken';
+            if (type === 'instant') return 'Inst.';
+            return '';
+        }
+
+        function resetValues() {
+            document.getElementById('flour').value = 500;
+            document.getElementById('hydration').value = 65;
+            document.getElementById('salt').value = 2.0;
+            document.getElementById('temp').value = 20;
+            document.getElementById('sourdoughAddon').value = 0;
+            document.getElementById('activity').value = 1.0;
+            document.getElementById('amountInputVal').value = 3.6;
+            document.getElementById('timeInputVal').value = 4;
+            document.getElementById('ballWeight').value = 280;
+            document.getElementById('ballCount').value = 4;
+            
+            document.getElementById('pizzaModeToggle').checked = false;
+            document.getElementById('onlySourdoughToggle').checked = false;
+            
+            togglePizzaMode();
+            toggleSourdoughMode();
+            setCalcMode('calcYeast'); 
+        }
+
+        // Initialize
+        setCalcMode('calcYeast');
+        togglePizzaMode(); 
+        toggleSourdoughMode();
+        updateCalculation();
+
+    </script>
+</body>
+</html>
