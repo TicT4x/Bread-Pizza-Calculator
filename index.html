@@ -277,6 +277,19 @@
 
             <!-- Triebmittel Settings -->
             <section class="space-y-3">
+                <!-- Yeast Type Segmented Control -->
+                <div class="bg-gray-800 p-1 rounded-lg flex text-xs shadow-md mb-3">
+                    <button id="btnYeastDry" onclick="setYeastType('dry')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-active">
+                        <i class="fa-solid fa-envelope mr-1"></i> Trocken
+                    </button>
+                    <button id="btnYeastFresh" onclick="setYeastType('fresh')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-inactive">
+                        <i class="fa-solid fa-cube mr-1"></i> Frisch
+                    </button>
+                    <button id="btnYeastSourdough" onclick="setYeastType('sourdough')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-inactive">
+                        <i class="fa-solid fa-jar mr-1"></i> Sauerteig
+                    </button>
+                </div>
+
                 <div class="flex justify-between items-center border-b border-gray-700 pb-1">
                     <h2 class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Triebmittel</h2>
                     <!-- Hybrid Toggle -->
@@ -289,19 +302,6 @@
                             </div>
                         </label>
                     </div>
-                </div>
-
-                <!-- Yeast Type Segmented Control (MOVED DOWN) -->
-                <div class="bg-gray-800 p-1 rounded-lg flex text-xs shadow-md mb-3">
-                    <button id="btnYeastDry" onclick="setYeastType('dry')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-active">
-                        <i class="fa-solid fa-envelope mr-1"></i> Trocken
-                    </button>
-                    <button id="btnYeastFresh" onclick="setYeastType('fresh')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-inactive">
-                        <i class="fa-solid fa-cube mr-1"></i> Frisch
-                    </button>
-                    <button id="btnYeastSourdough" onclick="setYeastType('sourdough')" class="flex-1 py-2 rounded-md transition-all duration-200 mode-inactive">
-                        <i class="fa-solid fa-jar mr-1"></i> Sauerteig
-                    </button>
                 </div>
 
                 <!-- Sauerteig Add-On (Hybrid) -->
@@ -340,17 +340,49 @@
                         
                         <!-- INPUT: Time (Visible in Mode "Wunschzeit") -->
                         <div id="inputTimeGroup">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="text-gray-300 text-sm">Gehzeit</label>
-                                <span class="text-[10px] text-gray-500">Stock+Stück</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <button class="control-btn" onclick="adjustValue('timeInputVal', -0.5)"><i class="fa-solid fa-minus text-xs"></i></button>
-                                <div class="flex items-baseline justify-center w-full">
-                                    <input type="number" id="timeInputVal" value="4" step="0.5" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
-                                    <span class="text-amber-500 text-sm ml-1">Std.</span>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-gray-300 text-sm font-bold">Wunschzeit</label>
+                                <div class="flex items-center cursor-pointer">
+                                    <span class="text-[10px] text-gray-400 mr-2 uppercase tracking-wide">Kühlschrankgare</span>
+                                    <label class="relative">
+                                        <input type="checkbox" id="fridgeToggle" class="sr-only peer" onchange="toggleFridge()">
+                                        <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                                    </label>
                                 </div>
-                                <button class="control-btn" onclick="adjustValue('timeInputVal', 0.5)"><i class="fa-solid fa-plus text-xs"></i></button>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <!-- Raumtemperatur -->
+                                <div class="flex items-center justify-between bg-gray-900/50 p-3 rounded-xl border border-gray-700">
+                                    <div>
+                                        <label class="text-gray-300 text-sm block">Raumtemperatur</label>
+                                        <span class="text-[10px] text-amber-500" id="lblRtTemp">20°C</span>
+                                    </div>
+                                    <div class="flex items-center justify-between w-28">
+                                        <button class="control-btn w-8 h-8" onclick="adjustValue('timeInputVal', -0.5)"><i class="fa-solid fa-minus text-xs"></i></button>
+                                        <div class="flex items-baseline justify-center">
+                                            <input type="number" id="timeInputVal" value="4" step="0.5" class="bg-transparent text-lg font-bold text-white outline-none w-12 text-center" onchange="updateCalculation()">
+                                            <span class="text-amber-500 text-xs ml-1">h</span>
+                                        </div>
+                                        <button class="control-btn w-8 h-8" onclick="adjustValue('timeInputVal', 0.5)"><i class="fa-solid fa-plus text-xs"></i></button>
+                                    </div>
+                                </div>
+
+                                <!-- Kühlschrank -->
+                                <div id="fridgeTimeContainer" class="hidden flex items-center justify-between bg-blue-900/10 p-3 rounded-xl border border-blue-900/50">
+                                    <div>
+                                        <label class="text-gray-300 text-sm block">Kühlschrank</label>
+                                        <span class="text-[10px] text-blue-400">4°C</span>
+                                    </div>
+                                    <div class="flex items-center justify-between w-28">
+                                        <button class="control-btn w-8 h-8" onclick="adjustValue('fridgeTimeInputVal', -1)"><i class="fa-solid fa-minus text-xs"></i></button>
+                                        <div class="flex items-baseline justify-center">
+                                            <input type="number" id="fridgeTimeInputVal" value="0" step="1" class="bg-transparent text-lg font-bold text-white outline-none w-12 text-center" onchange="updateCalculation()">
+                                            <span class="text-amber-500 text-xs ml-1">h</span>
+                                        </div>
+                                        <button class="control-btn w-8 h-8" onclick="adjustValue('fridgeTimeInputVal', 1)"><i class="fa-solid fa-plus text-xs"></i></button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -445,7 +477,7 @@
                     <span class="text-sm">Poolish/Vorteig</span>
                 </button>
                 <button onclick="addExtra('biga')" class="bg-gray-700 p-4 rounded-xl hover:bg-gray-600 flex flex-col items-center">
-                    <i class="fa-solid fa-cheese text-2xl text-amber-500 mb-2"></i> <!-- Biga (stiff) -->
+                    <i class="fa-solid fa-cheese text-2xl text-amber-500 mb-2"></i>
                     <span class="text-sm">Biga (45%)</span>
                 </button>
                 <button onclick="addExtra('oil')" class="bg-gray-700 p-4 rounded-xl hover:bg-gray-600 flex flex-col items-center col-span-2">
@@ -484,35 +516,28 @@
             
             <div class="space-y-3 font-mono text-lg" id="recipeContainer">
                 
-                <!-- Preferment Recipes Container (New) -->
+                <!-- Preferment Recipes Container -->
                 <div id="prefermentRecipeContainer" class="space-y-3 mb-6 hidden">
-                    <!-- Dynamic content will be injected here -->
+                    <!-- Dynamic content -->
                 </div>
 
                 <!-- Main Dough Section -->
                 <div id="mainDoughSection" class="space-y-3">
-                    <!-- Header for Main Dough (Hidden by default) -->
                     <h4 id="mainDoughHeader" class="text-amber-500 font-bold mb-2 text-sm uppercase tracking-wider border-b border-gray-700 pb-1 hidden">Hauptteig</h4>
 
-                    <!-- Static Parts -->
                     <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-amber-500">
                         <span class="text-gray-300">Mehl</span>
                         <span class="font-bold text-white"><span id="recFlour">0</span> g</span>
                     </div>
                     <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-blue-500">
-                        <div>
-                            <span class="text-gray-300 block">Wasser</span>
-                        </div>
+                        <span class="text-gray-300">Wasser</span>
                         <span class="font-bold text-white"><span id="recWater">0</span> g</span>
                     </div>
                     
-                    <!-- Extras Injection Point (For Oil etc.) -->
                     <div id="recipeExtras" class="space-y-3"></div>
 
                     <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-gray-400">
-                        <div>
-                            <span class="text-gray-300 block">Salz</span>
-                        </div>
+                        <span class="text-gray-300">Salz</span>
                         <span class="font-bold text-white"><span id="recSalt">0</span> g</span>
                     </div>
                     
@@ -548,7 +573,6 @@
     </div>
 
     <script>
-        // State
         let calcMode = 'calcYeast'; 
         let pizzaMode = false;
         let sourdoughMode = false;
@@ -556,17 +580,16 @@
         let currentYeastType = 'dry';
         let extras = []; 
 
-        // Constants
         const BASE_TEMP = 20; 
         const BASE_DRY_PCT_1H = 3.5; 
         const TIME_EXPONENT = -1.45; 
         const DOUBLING_TEMP_STEP = 5.0; 
+        const FRIDGE_TEMP = 4; // Constant for Fridge Calculation
 
         const YEAST_RATIOS_TO_DRY = { 'dry': 1.0, 'fresh': 3.0 };
         const SOURDOUGH_PCT_TO_DRY_YEAST_PCT = 0.01;
         const PREFERMENT_FLOUR_TO_DRY_YEAST_FACTOR = 0.005; 
 
-        // UI Handlers
         const footer = document.getElementById('footerPanel');
         let touchStartY = 0;
         footer.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive: true});
@@ -576,15 +599,8 @@
             if ((touchStartY - touchEndY) < -50 && isFooterOpen) toggleFooter();
         }, {passive: true});
 
-        function toggleSettings() {
-            const modal = document.getElementById('settingsModal');
-            toggleModal(modal);
-        }
-
-        function toggleAddIngredient() {
-            const modal = document.getElementById('addIngredientModal');
-            toggleModal(modal);
-        }
+        function toggleSettings() { toggleModal(document.getElementById('settingsModal')); }
+        function toggleAddIngredient() { toggleModal(document.getElementById('addIngredientModal')); }
 
         function toggleModal(modal) {
             if (modal.classList.contains('hidden')) {
@@ -610,8 +626,6 @@
                 icon.style.transform = "rotate(0deg)";
             }
         }
-
-        // --- Extras Logic ---
 
         function addExtra(type) {
             const id = Date.now();
@@ -653,12 +667,6 @@
             updateCalculation();
         }
 
-        function updateExtraValue(id, val) {
-            // Deprecated direct state update, using sync functions instead
-            // Kept for compatibility if called from code not updated
-            syncExtraFromInput(id, val);
-        }
-
         function toggleExtraMode(id) {
             const extra = extras.find(e => e.id === id);
             if (extra) {
@@ -674,7 +682,6 @@
 
             extras.forEach(extra => {
                 let controlsHtml = '';
-                
                 if (extra.type === 'poolish' || extra.type === 'biga') {
                     const isInc = extra.mode === 'inclusive';
                     controlsHtml = `
@@ -690,7 +697,6 @@
                     <button onclick="removeExtra(${extra.id})" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">
                         <i class="fa-solid fa-times"></i>
                     </button>
-                    
                     <div class="flex justify-between mb-2 items-center">
                         <div class="flex items-center">
                             <label class="text-gray-300 text-sm">${extra.label}</label>
@@ -704,14 +710,12 @@
                             </div>
                         </div>
                     </div>
-                    
                     <div class="flex items-center space-x-3">
                         <button class="control-btn" onclick="adjustExtra(${extra.id}, -${extra.step})"><i class="fa-solid fa-minus text-xs"></i></button>
                         <input type="range" id="extra_range_${extra.id}" min="0" max="${extra.max}" step="${extra.step}" value="${extra.value}" class="flex-1" oninput="syncExtraFromSlider(${extra.id}, this.value)">
                         <button class="control-btn" onclick="adjustExtra(${extra.id}, ${extra.step})"><i class="fa-solid fa-plus text-xs"></i></button>
                     </div>
-                </div>
-                `;
+                </div>`;
                 container.innerHTML += html;
             });
         }
@@ -744,8 +748,6 @@
             if (rangeInput) rangeInput.value = value;
             updateCalculation();
         }
-
-        // --- Core Logic ---
 
         function setDoughMode(mode) {
             pizzaMode = (mode === 'pizza');
@@ -807,7 +809,6 @@
                 if(hybridToggle.checked) hybridSourdoughContainer.classList.remove('hidden');
                 else hybridSourdoughContainer.classList.add('hidden');
             }
-            
             setCalcMode(calcMode); 
         }
 
@@ -816,6 +817,18 @@
              const container = document.getElementById('hybridSourdoughContainer');
              if(isChecked) container.classList.remove('hidden');
              else container.classList.add('hidden');
+             updateCalculation();
+        }
+
+        function toggleFridge() {
+             const isChecked = document.getElementById('fridgeToggle').checked;
+             const container = document.getElementById('fridgeTimeContainer');
+             if(isChecked) {
+                 container.classList.remove('hidden');
+             } else {
+                 container.classList.add('hidden');
+                 document.getElementById('fridgeTimeInputVal').value = 0;
+             }
              updateCalculation();
         }
 
@@ -853,8 +866,6 @@
             }
             updateCalculation();
         }
-
-        // --- Helper Functions ---
 
         function adjustValue(id, delta) {
             const input = document.getElementById(id);
@@ -904,6 +915,10 @@
             const hydration = parseFloat(document.getElementById('hydration').value);
             const saltPct = parseFloat(document.getElementById('salt').value);
             
+            // Sync current RT to the little label in the time tab
+            const lblRtTemp = document.getElementById('lblRtTemp');
+            if (lblRtTemp) lblRtTemp.innerText = temp + "°C";
+
             const sdFlourFactor = 100 / (100 + sdHydration);
 
             let targetTotalWeight = 0;
@@ -951,7 +966,6 @@
             if(mainWaterUnits < 0) mainWaterUnits = 0; 
 
             let saltUnits = tfUnits * (saltPct / 100);
-            
             let scalingFactor = 1.0;
             
             if (pizzaMode) {
@@ -960,7 +974,6 @@
                     sourdoughGrams = parseFloat(document.getElementById('sourdoughAddon').value);
                     targetTotalWeight -= sourdoughGrams; 
                 }
-                
                 let sumUnits = tfUnits + totalWaterUnits + saltUnits + oilUnits;
                 scalingFactor = targetTotalWeight / sumUnits;
             } else {
@@ -997,7 +1010,6 @@
                         label: e.label,
                         grams: finalOil
                     });
-                    
                     const dispEl = document.getElementById('disp_' + e.id);
                     if(dispEl) dispEl.innerText = Math.round(finalOil) + 'g |';
                 }
@@ -1009,24 +1021,25 @@
                 hybridSourdoughGrams = parseFloat(document.getElementById('sourdoughAddon').value);
                 const sdFlour = hybridSourdoughGrams * sdFlourFactor;
                 prefermentFermentationPower += hybridSourdoughGrams * 0.01; 
-                
                 let sdFlourAdded = hybridSourdoughGrams * sdFlourFactor;
                 finalSalt += sdFlourAdded * (saltPct/100);
             } else if (calcMode === 'calcTime' && sourdoughMode) {
                 let sdAmount = parseFloat(document.getElementById('amountInputVal').value);
-                prefermentFermentationPower += sdAmount * 0.01;
+                if (!isNaN(sdAmount)) prefermentFermentationPower += sdAmount * 0.01;
             }
 
             // --- Yeast Calculation ---
             const tempMultiplier = Math.pow(2, (temp - BASE_TEMP) / DOUBLING_TEMP_STEP);
+            const fridgeMultiplier = Math.pow(2, (4 - BASE_TEMP) / DOUBLING_TEMP_STEP);
 
             let yeastGramsForRecipe = 0;
             let resultValDisplay = "--";
 
             if (calcMode === 'calcTime') {
                 let yeastInput = parseFloat(document.getElementById('amountInputVal').value);
+                if (isNaN(yeastInput) || yeastInput < 0) yeastInput = 0;
+
                 let totalYeastPower = prefermentFermentationPower;
-                
                 if (!sourdoughMode) {
                     yeastGramsForRecipe = yeastInput;
                     const ratio = YEAST_RATIOS_TO_DRY[currentYeastType] || 1.0;
@@ -1039,6 +1052,7 @@
                 if (totalPowerPct <= 0.001) {
                     resultValDisplay = "∞";
                 } else {
+                    // Time represents the equivalent time at the current Room Temp
                     const effectiveTime = Math.pow((totalPowerPct / BASE_DRY_PCT_1H), (1 / TIME_EXPONENT));
                     const realHours = effectiveTime / tempMultiplier;
                     
@@ -1052,10 +1066,21 @@
                 }
 
             } else {
-                let timeInput = parseFloat(document.getElementById('timeInputVal').value);
-                const effectiveTime = timeInput * tempMultiplier;
-                const neededTotalDryPct = (BASE_DRY_PCT_1H * Math.pow(effectiveTime, TIME_EXPONENT)) / activityFactor;
+                let rtTimeInput = parseFloat(document.getElementById('timeInputVal').value);
+                if (isNaN(rtTimeInput) || rtTimeInput < 0) rtTimeInput = 0;
                 
+                let fridgeTimeInput = 0;
+                if (document.getElementById('fridgeToggle').checked) {
+                    fridgeTimeInput = parseFloat(document.getElementById('fridgeTimeInputVal').value);
+                    if (isNaN(fridgeTimeInput) || fridgeTimeInput < 0) fridgeTimeInput = 0;
+                }
+
+                if (rtTimeInput === 0 && fridgeTimeInput === 0) rtTimeInput = 0.1; // fallback
+
+                // Calculate total effective time considering both phases
+                const effectiveTime = (rtTimeInput * tempMultiplier) + (fridgeTimeInput * fridgeMultiplier);
+                
+                const neededTotalDryPct = (BASE_DRY_PCT_1H * Math.pow(effectiveTime, TIME_EXPONENT)) / activityFactor;
                 let neededTotalDryGrams = (neededTotalDryPct / 100) * finalTotalFlour;
                 
                 let neededYeastGramsDry = neededTotalDryGrams - prefermentFermentationPower;
@@ -1085,12 +1110,10 @@
             document.getElementById('waterAmount').innerText = Math.round(finalMainWater) + 'g';
             document.getElementById('saltAmount').innerText = Math.round(finalSalt) + 'g';
 
-            // Recipe
             document.getElementById('recFlour').innerText = Math.round(finalMainFlour);
             document.getElementById('recWater').innerText = Math.round(finalMainWater);
             document.getElementById('recSalt').innerText = Math.round(finalSalt);
             
-            // Render Preferment Recipes
             const prefContainer = document.getElementById('prefermentRecipeContainer');
             const mainHeader = document.getElementById('mainDoughHeader');
             
@@ -1098,27 +1121,20 @@
             
             if (prefermentRecipes.length > 0) {
                 prefContainer.classList.remove('hidden');
-                mainHeader.classList.remove('hidden'); // Show "Hauptteig" header
+                mainHeader.classList.remove('hidden'); 
                 
                 prefermentRecipes.forEach(p => {
-                    // Header
                     prefContainer.innerHTML += `<h4 class="text-amber-500 font-bold mb-2 text-sm uppercase tracking-wider border-b border-gray-700 pb-1 mt-4 first:mt-0">${p.label}</h4>`;
-                    
-                    // Flour Row
                     prefContainer.innerHTML += `
                     <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-amber-600 mb-3">
                         <span class="text-gray-300">Mehl</span>
                         <span class="font-bold text-white">${Math.round(p.flour)} g</span>
                     </div>`;
-                    
-                    // Water Row
                     prefContainer.innerHTML += `
                     <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-blue-600 mb-3">
                         <span class="text-gray-300">Wasser</span>
                         <span class="font-bold text-white">${Math.round(p.water)} g</span>
                     </div>`;
-                    
-                    // Yeast Prise Row
                     prefContainer.innerHTML += `
                     <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-600 mb-3">
                         <span class="text-gray-300">Hefe</span>
@@ -1130,7 +1146,6 @@
                 mainHeader.classList.add('hidden');
             }
 
-            // Render Extras (Oil) in Recipe
             const extrasContainer = document.getElementById('recipeExtras');
             extrasContainer.innerHTML = '';
             extrasRecipeData.forEach(e => {
@@ -1141,7 +1156,6 @@
                 </div>`;
             });
 
-            // Update Total Weight
             let totalWeight = finalMainFlour + finalMainWater + finalSalt + hybridSourdoughGrams + yeastGramsForRecipe;
             prefermentRecipes.forEach(p => totalWeight += (p.flour + p.water));
             extrasRecipeData.forEach(e => totalWeight += e.grams);
@@ -1149,7 +1163,6 @@
             document.getElementById('recTotal').innerText = Math.round(totalWeight);
             document.getElementById('totalWeightFooter').innerText = Math.round(totalWeight);
             
-            // Hybrid SD in Recipe
             const rowSourdoughRec = document.getElementById('rowSourdoughRec');
             if(hybridSourdoughGrams > 0) {
                 rowSourdoughRec.classList.remove('hidden');
@@ -1160,7 +1173,6 @@
                 rowSourdoughRec.classList.add('hidden');
             }
             
-            // Yeast in Recipe
             if (sourdoughMode) {
                  document.getElementById('recYeast').innerText = "0";
             } else {
@@ -1200,15 +1212,26 @@
             document.getElementById('activity').value = 1.0;
             document.getElementById('sdHydration').value = 60;
             document.getElementById('amountInputVal').value = 3.6;
+            
+            // Reset both times
             document.getElementById('timeInputVal').value = 4;
+            document.getElementById('fridgeTimeInputVal').value = 0;
+            
             document.getElementById('ballWeight').value = 280;
             document.getElementById('ballCount').value = 4;
             
             document.getElementById('pizzaModeToggle').checked = false;
-            document.getElementById('hybridSourdoughToggle').checked = false; // Reset hybrid toggle
+            document.getElementById('hybridSourdoughToggle').checked = false; 
+            document.getElementById('fridgeToggle').checked = false; 
+            
+            // Clear extras list
+            extras = [];
+            renderExtras();
             
             togglePizzaMode();
-            setYeastType('dry'); // Reset type to dry
+            toggleHybridSourdough();
+            toggleFridge();
+            setYeastType('dry'); 
         }
 
         // Initialize
