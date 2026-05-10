@@ -5,23 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Der smarte Rechner für Teig-Gehzeiten und Hefemengen.">
     
-    <!-- PWA / Mobile App Settings -->
     <title>Teig-Meister</title>
     <meta name="apple-mobile-web-app-title" content="Teig-Meister">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1f2937">
 
-    <!-- Embedded Icon (SVG) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%231f2937%22/><path d=%22M20 40 Q20 15 50 15 Q80 15 80 40 V 70 Q80 85 50 85 Q20 85 20 70 Z%22 fill=%22%23f59e0b%22/><path d=%22M30 40 Q50 30 70 40%22 stroke=%22%2392400e%22 stroke-width=%223%22 fill=%22none%22 stroke-linecap=%22round%22/></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%231f2937%22/><path d=%22M20 40 Q20 15 50 15 Q80 15 80 40 V 70 Q80 85 50 85 Q20 85 20 70 Z%22 fill=%22%23f59e0b%22/><path d=%22M30 40 Q50 30 70 40%22 stroke=%22%2392400e%22 stroke-width=%223%22 fill=%22none%22 stroke-linecap=%22round%22/></svg>">
-
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiVGVpZy1NZWlzdGVyIiwic2hvcnRfbmFtZSI6IlRlaWctTWVpc3RlciIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjMWYyOTM3IiwidGhlbWVfY29sb3ciOiIjMWYyOTM3IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIGZpbGw9JyUyMzFmMjkzNycvJTNFJTNDcGF0aCBkPSdNMjAgNDAgUTIwIDE1IDUwIDE1IFE4MCAxNSA4MCA0MCBWIDcwIFE4MCA4NSA1MCA4NSBRMjAgODUgMjAgNzAgWicgZmlsbD0nJTIzZjU5ZTBiJy8lM0UlM0NwYXRoIGQ9J00zMCA0MCBRNTAgMzAgNzAgNDAnIHN0cm9rZT0nJTIzOTI0MDBlJyBzdHJva2Utd2lkdGg9JzMnIGZpbGw9J25vbmUnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcvJTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiMTkyeDE5MiA1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJwdXJwb3NlIjoiYW55IG1hc2thYmxlIn1dfQ==">
+    <!-- Basic Favicon fallback -->
+    <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%231f2937%22%2F%3E%3Cpath%20d%3D%22M20%2040%20Q20%2015%2050%2015%20Q80%2015%2080%2040%20V%2070%20Q80%2085%2050%2085%20Q20%2085%2020%2070%20Z%22%20fill%3D%22%23f59e0b%22%2F%3E%3Cpath%20d%3D%22M30%2040%20Q50%2030%2070%2040%22%20stroke%3D%22%2392400e%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Custom Range Slider Styling */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -32,7 +27,7 @@
             height: 18px; 
             width: 18px;
             border-radius: 50%;
-            background: #f59e0b; /* Amber 500 */
+            background: #f59e0b; 
             cursor: pointer;
             margin-top: -7px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -44,7 +39,6 @@
             background: #4b5563;
             border-radius: 2px;
         }
-        /* Custom Number Input Styling */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -107,7 +101,6 @@
             border-bottom: 2px solid #f59e0b;
             color: #f59e0b;
         }
-        /* Footer Animation */
         #footerPanel {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding-bottom: env(safe-area-inset-bottom);
@@ -340,11 +333,11 @@
                         
                         <!-- INPUT: Time (Visible in Mode "Wunschzeit") -->
                         <div id="inputTimeGroup">
-                            <div class="flex justify-between items-center mb-3">
-                                <label class="text-gray-300 text-sm">Wunschzeit</label>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-gray-300 text-sm">Gehzeit</label>
                                 <div class="flex items-center">
                                     <label class="flex items-center cursor-pointer">
-                                        <span class="text-[10px] text-gray-400 mr-2 uppercase tracking-wide">Kühlschrankgare</span>
+                                        <span class="text-[10px] text-gray-400 mr-2 uppercase tracking-wide">Kühlschrank</span>
                                         <div class="relative">
                                             <input type="checkbox" id="fridgeToggle" class="sr-only peer" onchange="toggleFridge()">
                                             <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
@@ -353,36 +346,30 @@
                                 </div>
                             </div>
                             
-                            <div class="space-y-4">
-                                <!-- Raumtemperatur -->
-                                <div>
-                                    <div class="flex justify-end mb-1">
-                                        <span class="text-[10px] text-gray-500" id="lblRtTempContainer">Raumtemp. (<span id="lblRtTemp">20</span>°C)</span>
+                            <!-- Raumtemperatur -->
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <button class="control-btn" onclick="adjustValue('timeInputVal', -0.5)"><i class="fa-solid fa-minus text-xs"></i></button>
+                                    <div class="flex items-baseline justify-center w-full">
+                                        <input type="number" id="timeInputVal" value="4" step="0.5" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
+                                        <span class="text-amber-500 text-sm ml-2">Std.</span>
                                     </div>
-                                    <div class="flex items-center justify-between">
-                                        <button class="control-btn" onclick="adjustValue('timeInputVal', -0.5)"><i class="fa-solid fa-minus text-xs"></i></button>
-                                        <div class="flex items-baseline justify-center w-full">
-                                            <input type="number" id="timeInputVal" value="4" step="0.5" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
-                                            <span class="text-amber-500 text-sm ml-2">Std.</span>
-                                        </div>
-                                        <button class="control-btn" onclick="adjustValue('timeInputVal', 0.5)"><i class="fa-solid fa-plus text-xs"></i></button>
-                                    </div>
+                                    <button class="control-btn" onclick="adjustValue('timeInputVal', 0.5)"><i class="fa-solid fa-plus text-xs"></i></button>
                                 </div>
+                                <div class="text-center mt-1"><span class="text-[10px] text-gray-500" id="lblRtTempContainer">bei Raumtemp. (<span id="lblRtTemp">20</span>°C)</span></div>
+                            </div>
 
-                                <!-- Kühlschrank -->
-                                <div id="fridgeTimeContainer" class="hidden pt-3 border-t border-gray-700">
-                                    <div class="flex justify-end mb-1">
-                                        <span class="text-[10px] text-blue-400">Kühlschrank (4°C)</span>
+                            <!-- Kühlschrank -->
+                            <div id="fridgeTimeContainer" class="hidden mt-4 pt-4 border-t border-gray-700">
+                                <div class="flex items-center justify-between">
+                                    <button class="control-btn" onclick="adjustValue('fridgeTimeInputVal', -1)"><i class="fa-solid fa-minus text-xs"></i></button>
+                                    <div class="flex items-baseline justify-center w-full">
+                                        <input type="number" id="fridgeTimeInputVal" value="0" step="1" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
+                                        <span class="text-blue-400 text-sm ml-2">Std.</span>
                                     </div>
-                                    <div class="flex items-center justify-between">
-                                        <button class="control-btn" onclick="adjustValue('fridgeTimeInputVal', -1)"><i class="fa-solid fa-minus text-xs"></i></button>
-                                        <div class="flex items-baseline justify-center w-full">
-                                            <input type="number" id="fridgeTimeInputVal" value="0" step="1" class="bg-transparent text-xl font-bold text-white outline-none w-20 text-center" onchange="updateCalculation()">
-                                            <span class="text-amber-500 text-sm ml-2">Std.</span>
-                                        </div>
-                                        <button class="control-btn" onclick="adjustValue('fridgeTimeInputVal', 1)"><i class="fa-solid fa-plus text-xs"></i></button>
-                                    </div>
+                                    <button class="control-btn" onclick="adjustValue('fridgeTimeInputVal', 1)"><i class="fa-solid fa-plus text-xs"></i></button>
                                 </div>
+                                <div class="text-center mt-1"><span class="text-[10px] text-blue-400">bei 4°C (Kühlschrank)</span></div>
                             </div>
                         </div>
 
@@ -571,6 +558,49 @@
             </button>
         </div>
     </div>
+
+    <!-- INITIATE PWA ENVIRONMENT -->
+    <script>
+        // Setup PWA Manifest dynamically to ensure perfect base64 and SVG parsing
+        window.addEventListener('DOMContentLoaded', () => {
+            const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1f2937"/><path d="M20 40 Q20 15 50 15 Q80 15 80 40 V 70 Q80 85 50 85 Q20 85 20 70 Z" fill="#f59e0b"/><path d="M30 40 Q50 30 70 40" stroke="#92400e" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+            const iconDataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(iconSvg);
+            
+            const appleIcon = document.createElement('link');
+            appleIcon.rel = 'apple-touch-icon';
+            appleIcon.href = iconDataUrl;
+            document.head.appendChild(appleIcon);
+
+            const manifest = {
+                name: "Teig-Meister",
+                short_name: "Teig-Meister",
+                start_url: window.location.href.split('?')[0],
+                display: "standalone",
+                background_color: "#1f2937",
+                theme_color: "#1f2937",
+                icons: [
+                    { src: iconDataUrl, sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any maskable" }
+                ]
+            };
+
+            const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = URL.createObjectURL(manifestBlob);
+            document.head.appendChild(manifestLink);
+
+            // Dummy Service Worker to satisfy strict PWA install criteria on Android
+            if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', e => {});
+                `;
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+            }
+        });
+    </script>
 
     <script>
         let calcMode = 'calcYeast'; 
@@ -1211,9 +1241,8 @@
             
             document.getElementById('activity').value = 1.0;
             document.getElementById('sdHydration').value = 60;
-            document.getElementById('amountInputVal').value = 3.6;
+            document.getElementById('amountInputVal').value = 3.5; // Fixed typo here (was 3.6 in reset)
             
-            // Reset both times
             document.getElementById('timeInputVal').value = 4;
             document.getElementById('fridgeTimeInputVal').value = 0;
             
@@ -1224,7 +1253,6 @@
             document.getElementById('hybridSourdoughToggle').checked = false; 
             document.getElementById('fridgeToggle').checked = false; 
             
-            // Clear extras list
             extras = [];
             renderExtras();
             
